@@ -1,0 +1,47 @@
+@import url('screen.css');
+body {
+	font-size: 12px;
+	font-family:  arial,tahoma,sans-serif;
+	padding: 10px;
+}
+h1,h2,h3,h4,h5 {
+	font-family:  arial,tahoma,sans-serif;
+}
+img {
+	border: none;
+}
+.accessibility, .edit-actions, .account-options, .account-options ul,
+.successmsg, .errormsg, .question,
+.step-actions-container {
+	display: none !important;	
+}
+.step-contents-container-annotation, .step-contents-container-student, .step-contents-container-teacher {
+	width: 47%;	
+	border: 2px solid black;
+}
+.step-container, #assignment-details {
+	border: 2px solid black !important;
+}
+.step-title-container {
+	border-bottom: 2px solid black;
+}
+.assignment-label {
+	color: black;
+	font-weight: bold;
+}
+#header h1 a:link {
+	text-decoration: none;
+}
+#header h1 img {
+	padding: 0;
+	margin: 0;
+	vertical-align: middle;
+}
+#header h1 a:link, #header h1 a:visited {
+	color: black;
+	text-decoration: none;
+	border: none;
+}
+.footer p, .footer p a:link, .footer p a:visited {
+	color: black;
+}

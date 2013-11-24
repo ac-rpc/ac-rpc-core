@@ -1,0 +1,23 @@
+Options +FollowSymlinks
+Order deny,allow
+Allow from all
+# Smarty templates are blocked
+<FilesMatch "\.(tpl|sql)$">
+	Order deny,allow
+	Deny from all
+</FilesMatch>
+<Files ~ "tags">
+	Order deny,allow
+	Deny from all
+</Files>
+
+RewriteEngine On
+RewriteBase /
+
+RewriteRule ^(assignments|templates|links)/?$ index.php [L,R]
+RewriteRule ^assignments/([0-9]+)/?$ index.php?assign=$1 [L,QSA]
+RewriteRule ^assignments/([0-9]+)/([A-Za-z]+)$ index.php?assign=$1&action=$2 [L,QSA]
+RewriteRule ^templates/([0-9]+)/?$ index.php?tmpl=$1 [L,QSA]
+RewriteRule ^templates/([0-9]+)/([A-Za-z]+)$ index.php?tmpl=$1&action=$2 [L,QSA]
+RewriteRule ^links/([0-9]+)/?$ index.php?link=$1 [L,QSA]
+RewriteRule ^links/([0-9]+)/([A-Za-z]+)$ index.php?link=$1&action=$2 [L,QSA]

@@ -1,0 +1,10 @@
+This is a custom build of the Dojo Toolkit, redistributed under the BSD
+license.  To use an alternate Dojo release, change the $DOJO_PATH variable
+in inc/config.inc.php. 
+
+The current build is based on Dojo 1.4.3
+
+If you would like to create your own Dojo custom build, use the build 
+script provided in the build/ directory.
+
+For complete Dojo Toolkit releases, visit http://dojotoolkit.org

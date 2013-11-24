@@ -1,0 +1,48 @@
+/**
+ * Copyright 2010 by the Regents of the University of Minnesota, 
+ * University Libraries - Minitex
+ *
+ * This file is part of The Research Project Calculator (RPC).
+ * 
+ * RPC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * RPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with The RPC.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * =================================================================
+ * CHANGELOG
+ */
+
+Version History
+===============
+0.10.1: 2011-08-11 Michael Berkowski <mjb@umn.edu>
+	* Updated RPC_Smarty for Smarty 3.x
+
+0.10.0: 2011-06-11 Michael	Berkowski <mjb@umn.edu>
+	* Updated to dojo 1.6.1 for IE9 compatibility
+
+0.9.12: 2011-05-11 Michael Berkowski <mjb@umn.edu>
+	* BUGFIX: SQL install script had incorrect column length for passwordsalt
+	* Version number not incremented since this only affects the buildscript
+
+0.9.12: 2011-01-02 Michael Berkowski <mjb@umn.edu>
+	* Added password salt to native auth. Legacy (unsalted) users get salt on first login
+
+0.9.11: 2010-12-16 Michael Berkowski <mjb@umn.edu>
+	* BUGFIX: app_file_path incorrectly calculated in Windows
+	* BUGFIX: RPC_Smarty failed to call parent::__construct()
+
+0.9.10: 2010-11-29 Michael Berkowski <mjb@umn.edu>
+	* Added template usage tracking with table template_usage
+
+0.9.9: 2010-10-18 Michael Berkowski <mjb@umn.edu>
+	* First public release of new Research Project Calculator
+

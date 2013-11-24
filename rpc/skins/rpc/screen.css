@@ -1,0 +1,736 @@
+/**
+ * RPC skin color palette
+ *
+ * #333333: Base body text
+ * #E0ECFF: Light blue - Large widget backgrounds
+ * #334455: Dark blue - Body background, step title headings, large widget borders,headings
+ * #885555: Orange-red - Links, main assignment title, form labels
+ * #553322: Dark red - Link hover, error message text
+ * #CCCCBB: Beige - Fieldset backgrounds, odd <tr>
+ * #AAAA99: Darker Beige - even <tr>
+ * #AAAACC: Bluish-purple - <th>
+ * #777777: Medium-gray - Instructions, form descriptions
+ *
+ * Notifications:
+ * Error: FG: #553322 BG: #EECCBB BORDER: #553322
+ * Success: FG: #553322 BG: #BBEEBB BORDER: #779977
+ * Question/Alert: FG: #553322 BG: #FFF39B BORDER: #BBB369
+ */
+
+body {
+	font-family: arial, helvetica, sans-serif;
+	color: #333333;
+	font-size: 90%;
+	background-color: #334455;
+	padding: 0;
+	margin: 0;
+	min-width: 800px;
+}
+.accessibility {
+	visibility: hidden;
+	left: -9999px;
+	z-index: -100;
+	position: absolute;
+}
+/* Advanced controls aren't visible... */
+.ctl-advanced {
+	visibility: hidden;
+}
+/* Unless they occur within a .mode-advanced container */
+.mode-advanced .ctl-advanced {
+	visibility: visible;
+}
+/* Rounded borders on most stuff */
+#header, #footer, #maincol,
+.main-widget, .admin-widget, .acct-widget,
+#assign-title, #assignment-details,
+.steps-list li,
+.step-contents-container-annotation, .step-contents-container-student, .step-contents-container-teacher {
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-khtml-border-radius: 5px;
+	-webkit-border-radius: 5px;
+}
+#content {
+	padding: 10px;
+	background-color: transparent;
+	padding: 15px;
+	clear: both;
+}
+#header, #footer, #maincol {
+	background-color: #E0ECFF;
+	border: 6px solid white;
+	padding: 10px;
+	margin-bottom: 10px;
+}
+#header {
+	padding: 4px;
+	height: 64px;
+}
+#header h1 {
+	font-size: 200%;
+	padding: 0;
+	margin: 0;
+	display: inline;
+	float: left;
+	width: 55%;
+}
+#header h1 img {
+	padding: 0;
+	margin: 0;
+	vertical-align: middle;
+}
+#header h1 a:link, #header h1 a:visited {
+	color: #334455;
+	text-decoration: none;
+	border: none;
+}
+#footer {
+	font-style: italic;
+	text-align: center;
+}
+
+#footer p {
+	padding: 3px;
+	margin: 0;
+}
+.dummy {
+	clear: both;
+}
+.rt-sidebar {
+	float: right;
+	clear: right;
+	padding: 40px 0 0 0;
+	width: 18%;
+	margin: 0;
+}
+.rt-sidebar-group {
+	padding: 8px;
+	margin: 0 20px 20px 0;
+	max-width: 180px;
+	border: 1px solid yellow;
+}
+#content h3, .step-title-container {
+	margin: 0;
+	padding: 3px 3px 3px 25px;
+	background-color: #334455;
+	color: white;
+	font-weight: normal;
+	font-size: 130%;
+	text-align: left;
+}
+a:link, a:visited {
+	color: #885555;
+	text-decoration: none;
+	border-bottom: 1px dotted #885555;
+}
+a:hover {
+	color: #553322;
+	border-bottom: 1px dotted #553322;
+}
+#version {
+	text-align: right;
+	margin-right: 20px;
+	color: #777777;
+	font-style: italic;
+}
+#welcome {
+	text-align: right;
+	margin-bottom: 3px;
+}
+.not-me {
+	font-size: smaller;
+	font-style: italic;
+}
+#header .account-options {
+	display: inline;
+	width: 40%;
+	float: right;
+}
+.account-options, .edit-actions {
+	font-style: normal;
+	text-align: right;
+	margin: 0 15px 3px 0;
+}
+.account-options ul li, .edit-actions ul li {
+	list-style-type: none;
+	display: inline;
+	padding-left: 3px;
+	border-left: 1px solid #885555;
+}
+.account-options ul li:first-child, .edit-actions ul li:first-child {
+	border-left: none;
+}
+.account-options ul, .edit-actions ul {
+	margin: 0;
+	padding: 0;
+}
+#modifyacct-form h4 {
+	display: none;
+}
+#modifyacct-form fieldset {
+	margin-top: 10px;
+}
+.admin-searchreturn {
+	margin-right: 3em;
+}
+#admin-perms-message {
+	font-weight: bold;
+	padding: 2px;
+	margin: 10px 50px;
+}
+#admin-searchusers-result {
+	padding: 2px;
+	margin: 1px;
+	text-align: center;
+}
+#table-privileged-users {
+	width: 100%;
+}
+.special, .errormsg {
+	color: #553322;
+	font-weight: bold;
+}
+.errormsg, .successmsg, .question {
+	text-align: center;
+	background-color: #EECCBB;
+	padding: 8px;
+	margin: 10px 50px;
+	border: 2px solid #553322;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+}
+.successmsg, #admin-perms-message {
+	background-color: #BBEEBB;
+	border-color: #779977;
+}
+.question {
+	background-color: #FFF39B;
+	border-color: #BBB369;
+}
+.invisible {
+	visibility: hidden;
+}
+.info, .instructions, .field-instructions {
+	font-style: italic;
+	color: #777777;
+	margin: 0 15px;
+}
+.info {
+	margin: 15px;
+	text-align: center;
+}
+
+/*-------------- Widget/Module CSS ----------------*/
+.main-widget, .admin-widget, .acct-widget {
+	margin: 2px 0 10px 0;
+	padding: 0;
+	border: 2px solid #334455;
+	background-color: #CCCCBB;
+	clear: both;
+}
+#new-assignment-form-container {
+	float: left;
+	clear: left;
+	width: 80%;
+	margin-right: 0;
+}
+#template-list {
+	padding: 0;
+	margin: 0 0 0 40px;
+}
+#fieldset-new-assign, #fieldset-new-template, #fieldset-admin-searchusers, .acct-widget fieldset {
+	border: none;
+	padding: 10px;
+}
+.acct-widget legend, .admin-widget legend, #fieldset-admin-searchusers legend {
+	display: none;
+}
+.template-choice {
+	list-style-position: outside;
+	list-style-type: none;
+	padding: 2px 10px 2px 10px;
+	margin: 5px;
+	background-color: #E0ECFF;
+	border: 1px solid black;
+	height: auto;
+}
+.template-choice input[type="radio"] {
+	margin-left: 6px;
+}
+.template-choice.template-blank {
+	background-color: #CCAA99;
+}
+.template-unpublished {
+	color: #444;
+}
+.template-sel {
+	background-color: #BBEEBB;
+}
+.template-info {
+	display: inline-block;
+	width: 70%;
+}
+.template-title {
+	font-size: 120%;
+	color: #553322;
+}
+.template-class {
+	display: inline;
+}
+.template-actions {
+	display: inline-block;
+	text-align: right;
+	width: 29%;
+}
+table.assignment-list {
+	padding: 0px 6px;
+	width: 100%;
+}
+#assign-description {
+	font-style: italic;
+	color: #666;
+}
+.assignment-brief-view {
+	border: 1px dotted black;
+	background-color: white;
+	list-style-type: none;
+	list-style-position: outside;
+	margin-bottom: 4px;
+	padding: 3px;
+}
+.assignment-brief-view .special {
+	font-weight: normal;
+	font-style: italic;
+}
+.assignment-brief-title h4 {
+	margin: 0;
+	padding: 3px 0;
+}
+.assignment-actions {
+	display: inline-block;
+}
+.assignment-actions ul {
+	list-style-type: none;
+}
+.assignment-brief-details {
+	display: inline-block;
+	width: 70%;
+	height: 100%;
+}
+.assignment-label {
+	color: #885555;
+	display: inline-block;
+}
+.fixed-label {
+	width: 14em;
+	text-align: right;
+	margin-top: 4px;
+}
+li.todo-item {
+	list-style-position: outside;
+	list-style-type: none;
+	padding: 3px;
+	margin-bottom: 4px;
+	background-color: white;
+	border: 1px dotted black;
+}
+#assignment-header {
+	padding: 0;
+}
+#assignment-details {
+	margin: 5px 0;
+	padding: 10px;
+	border: 2px solid #334455;
+}
+#assignment-details ol.field-list,
+#assignment-details ol.field-list li {
+	margin: 0;
+	padding: 0;
+}
+#assignment-details h4{
+	display: none;
+}
+h3#assign-title {
+	font-size: 180%;
+	font-weight: normal;
+	color: white;
+	background-color: #885555;
+	border: 2px solid #334455;
+	padding: 4px 25px;
+}
+#assign-description {
+	display: none;
+}
+.steps-list {
+	padding: 0;
+	margin: 4px 0;
+}
+.steps-list li {
+	list-style-type: none;
+	list-style-position: outside;
+	border: 2px solid #334455;
+	background-color: #CCCCBB;
+	margin-left: 0;
+	margin-bottom: 10px;
+	padding: 0;
+	/* 
+		Dijit/Tundra overwrites the cursor because the whole
+		<li> node is part of a drag 'n drop. Since we're
+		using DnD handles, override the cursor back to a normal
+		pointer.
+	*/
+	cursor: default !important;
+}
+.step-head {
+	font-size: 130%;
+	font-weight: bold;
+	color: white;
+	padding: 0;
+}
+.step-head span.instructions {
+	font-style: italic;
+	font-weight: normal;
+	font-size: 70%;
+	color: #AAAAAA;
+}
+.step-title-container {
+	font-size: 100%;
+	background-color: #334455;
+	padding: 5px 5px 5px 25px;
+	margin: 0;
+}
+.step-actions-container {
+	padding: 2px;
+	background-color: #885555;
+}
+.step-actions {
+	display: inline-block;
+	width: 20%;
+	text-align: right;
+	font-size: 60%;
+}
+.stepdesc-head {
+	margin: 0 0 2px 0;
+	padding: 2px;
+	color: white;
+	font-size: 100%;
+	font-weight: normal;
+}
+.step-details {
+	padding: 5px 5px 5px 10px;
+}
+.step-contents-container {
+	padding: 5px;
+}
+.step-contents-container-annotation h4.stepdesc-head {
+	background-color: #558888;
+}
+.step-contents-container-student h4.stepdesc-head {
+	background-color: #558888;
+}
+.step-contents-container-teacher h4.stepdesc-head {
+	background-color: #885555;
+}
+.step-container {
+	overflow: auto;
+}
+.step-contents-container-annotation, .step-contents-container-student, .step-contents-container-teacher {
+	margin: 5px 2px;
+	border-top: 2px solid #334455;
+	background-color: white;
+	padding: 4px;
+	display: inline;
+	float: left;
+	width: 48%;
+	overflow: auto;
+
+	/* Color / font scheme */
+	color: black;
+	font-weight: normal;
+	font-size: 95%;
+	font-family: arial, helvetica, sans-serif;
+}
+.step-wide {
+	display: block;
+	float: none;
+	width: 98%;
+}
+.step-contents.student {
+	clear: left;
+	margin-right: 1%;
+}
+.step-contents.teacher, .step-contents.annotation {
+	clear: right;
+}
+/* Inside step-contents, strip bare all the headings */
+.step-contents h1,
+.step-contents h2,
+.step-contents h3,
+.step-contents h4,
+.step-contents h5 {
+	color: black !important;
+	background-color: white !important;
+}
+.step-contents h1 {font-size: 130%;}
+.step-contents h2 {font-size: 120%;}
+.step-contents h3 {font-size: 110%;}
+.step-contents h4 {font-size: 100%;}
+.step-contents h5 {font-size: 95%;}
+
+.step-contents.annotation ul li,
+.step-contents.student ul li,
+.step-contents.teacher ul li,
+.step-contents.annotation ol li,
+.step-contents.student ol li,
+.step-contents.teacher ol li {
+	list-style-type: disc;
+	background-color: transparent;
+	border: none;
+	margin: 0;
+	padding: 0;
+}
+.step-contents.annotation ol li, .step-contents.student ol li, .step-contents.teacher ol li {
+	list-style-type: decimal;
+}
+.step-contents-footer {
+	clear: both;
+	margin-top: 1px;
+}
+.step-num {
+
+}
+.step-head-content-edit {
+	display: inline-block;
+	width: 75%;
+	color: white;
+	font-weight: normal;
+	padding: 3px 3px 3px 25px;
+}
+.step-head-content-view {
+	display: inline-block;
+	width: auto;
+}
+.editor-controls {
+	clear: both;
+}
+/*-------------- Form CSS ----------------*/
+.field-instructions {
+	color: #885555	
+}
+fieldset {
+	background-color: #CCCCBB;
+	border: 1px solid #334455;
+}
+label {
+}
+label.radio-label {
+	float: none;
+	width: auto;
+}
+ol.field-list, ol.field-list-inline {
+	list-style-position: outside;
+	padding: 0;
+}
+ol.field-list li, ol.field-list-inline li {
+	list-style-type: none;
+	padding: 2px;
+	margin-top: 2px;
+}
+ol.fieldlist li.radio-list {
+	padding: 0;
+	list-style-position: inside;
+}
+ol.field-list-inline li {
+	display: inline;
+}
+.resubmit {
+	background-color: #EECCBB;
+	border: 2px solid #553322;
+}
+.required {
+	color: #663344;
+}
+
+/*-------------- Table CSS ----------------*/
+table {
+	border-collapse: collapse;
+	border: 1px solid #334455;
+}
+td, th {
+	border: 1px solid white;
+	padding: 3px;
+}
+th {
+	background-color: #AAAACC;
+	font-weight: normal;
+}
+.tr-odd {
+	background-color: #CCCCBB;
+}
+.tr-even {
+	background-color: #AAAA99;
+}
+.tr-new {
+	font-style: italic;
+	background-color: #AA8888;
+}
+.right {
+	text-align: right;
+}
+.center {
+	text-align: center;
+}
+.inline {
+	display: inline;
+}
+.radio-col {
+	text-align: center;
+}
+
+/*--------------- Form CSS ------------------*/
+#fieldset-new-assign legend {
+	display: none;
+}
+.mini-button {
+	cursor: pointer;
+	margin-left: 3px;
+	height: 27px;
+	width: 27px;
+	padding: 0;
+}
+.mini-button img {
+	padding: 0;
+	margin: 0px 2px;
+	border: none;
+}
+.mini-button.step-savepercent {
+	height: auto;
+	width: auto;
+}
+input[type="text"], input[type="password"], select {
+	padding: 1px;
+	font-size: 100%;
+	border: 1px solid #B3B3B3;
+}
+input[type="submit"] {
+	font-size: 90%;
+	padding: 2px;
+}
+input.short {
+	width: 3em;
+	text-align: right;
+}
+input.wide {
+	width: 24em;
+	text-align: left !important;
+}
+.new-template {
+	text-align: right;
+	margin: 4px 8px;
+
+}
+.cal-button {
+	vertical-align: middle;
+	border: 1px solid transparent;
+	padding: 0;
+	height: 24px;
+	width: 24px;
+}
+.dijitDateTextBox {
+	padding: 1px !important;
+	width: 7em !important;
+	text-align: right !important;
+	font-size: 100% !important;
+}
+/* TODO: Make the input field bg gray when disabled! */
+.dijitDateTextBoxDisabled, .dijitDateTextBoxDisabled div div.dijitReset.dijitInputField input {
+	background-color: #ddd !important;
+}
+.dijitDialogPaneContent {
+	text-align: center;
+}
+.dijitCloseButton {
+	margin-top: 6px;
+}
+.dijitInline {
+	color: black !important;
+}
+.dijitInline .dijitTextBox {
+	width: 50% !important;
+	text-align: left !important;
+	font-size: 150%;
+}
+.dijitClickableRegion {
+	color: black !important
+}
+.dijitSpinner {
+	width: 5.5em !important;
+	text-align: right !important;
+	font-size: 95% !important;
+}
+.dijit {
+	background-image: none !important;
+	font-family: arial,helvetica,sans-serif !important;
+}
+
+/*--------------- DnD CSS ------------------*/
+
+.dojoDndItemOver {
+	border: 2px solid #885555 !important;
+}
+.dojoDndItemAnchor, .dojoDndItemSelected {
+	border: 2px solid white !important;
+	background-color: #EEEECC !important;
+}
+.dojoDndItemBefore {
+	border-top: 2px solid #CC0000 !important;
+}
+.dojoDndItemAfter {
+	border-bottom: 2px solid #CC0000 !important;
+}
+.dojoDndHandle {
+	cursor: move;
+	display: inline-block !important;
+	width: 75%;
+	margin: 0 !important;
+}
+.dojoDndAvatar {
+	width: 400px !important;
+}
+.dojoDndAvatarHeader {
+	height: 18px !important;
+	font-size: 110% !important;
+	font-weight: bold !important;
+}
+.dojoDndAvatar li {
+	list-style-type: none;
+	list-style-position: outside;
+}
+.dojoDndAvatarItem {
+	border: none !important;
+	background-color: #CCCCBB;
+}
+.dojoDndAvatar button {
+	display: none;
+}
+.dojoDndAvatar .step-contents-container, .dojoDndAvatar .step-details, .dojoDndAvatar .instructions {
+	display: none;
+}
+/* Rich Text Editor */
+.RichTextEditable {
+	background-color: white !important;
+	padding: 3px;
+}
+.editor-controls {
+	text-align: right;
+	padding-right: 10px;
+}
+.openlink, .closelink {
+	padding: 1px;
+}
+/* Close buttons are displayed when editors are active */
+.closelink {
+	display: none;
+}
