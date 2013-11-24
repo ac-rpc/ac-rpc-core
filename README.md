@@ -1,4 +1,5 @@
-=================================================================
+# Assignment Calculator / Research Project Calculator
+
 Copyright 2013 by the Regents of the University of Minnesota, 
 University Libraries - Minitex
 
@@ -16,9 +17,8 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with The RPC.  If not, see <http://www.gnu.org/licenses/>.
-=================================================================
 
-#Installation Instructions
+##Installation Instructions
 
-For complete installation details, visit
-https://wiki.minitex.umn.edu/ResearchProjectCalculator
+
+For complete installation details, visit https://wiki.minitex.umn.edu/ResearchProjectCalculator
