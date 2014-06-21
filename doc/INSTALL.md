@@ -1,13 +1,9 @@
 ## Research Project Calculator Installation
-**Note:** Instructions for the Research Project Calculator ''Classic'' have been [ResearchProjectCalculator/Classic|moved to their own page.]
 
-**Note:** This project's code has only recently made it out into the wild. If you have any problems installing, please [[https://www.minitex.umn.edu/Contact/|contact us]], to the attention of Link Swanson.
+**Note:** The Research Project Calculator _Classic_ is no longer supported
 
 ### Mailing List
-Please [[http://lists.minitex.umn.edu/mailman/listinfo/rpc-development|join the RPC-development mailing list]] for information about new releases, bugfixes, etc. It is a very low-traffic list.
-
-### Download
- - [[http://sourceforge.net/projects/research-calc/|Download from Sourceforge]]
+Please [|join the RPC-development mailing list](http://lists.minitex.umn.edu/mailman/listinfo/rpc-development) for information about new releases, bugfixes, etc. It is a very low-traffic list.
 
 ### System Requirements
 #### Server Requirements
@@ -96,9 +92,9 @@ Research Project Calculator configuration is stored in `inc/config.inc.php`.
  - No assignment templates have been created in your installation. You can create them manually, or if you would like to copy the ones used by Minitex, [[https://www.minitex.umn.edu/Contact/|contact us]] with a message sent to the attention of Link Swanson.
 
 ### User Types & Administration
- - [User type descriptions and administration](doc/useradmin.md)
+ - [User type descriptions and administration](useradmin.md)
 
 ## Advanced Topics
- - [Skins & Theming](doc/skins.md)
- - [Custom authentication plugins](doc/authplugins.md)
- - [URL Rewriting] (not yet documented)
+ - [Skins & Theming](skins.md)
+ - [Custom authentication plugins](authplugins.md)
+ - URL Rewriting (not yet documented)
