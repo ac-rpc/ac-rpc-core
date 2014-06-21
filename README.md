@@ -1,6 +1,6 @@
 # Assignment Calculator / Research Project Calculator
 
-Copyright 2013 by the Regents of the University of Minnesota, 
+Copyright 2014 by the Regents of the University of Minnesota, 
 University Libraries - Minitex
 
 This file is part of The Research Project Calculator (RPC).
@@ -21,4 +21,4 @@ along with The RPC.  If not, see <http://www.gnu.org/licenses/>.
 ##Installation Instructions
 
 
-For complete installation details, visit https://wiki.minitex.umn.edu/ResearchProjectCalculator
+See [INSTALL.md](doc/INSTALL.md) in the `doc/` directory.
