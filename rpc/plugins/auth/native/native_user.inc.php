@@ -26,7 +26,6 @@ require_once(dirname(__FILE__) . "/../../../inc/rpc_smarty.inc.php");
  * RPC users utilizing the 'native' authentication plugin
  *
  * @package RPC
- * @author Michael Berkowski <mjb@umn.edu>
  */
 class Native_User extends RPC_User
 {

@@ -25,8 +25,6 @@
  * Database connection object singleton
  *
  * @package RPC
- * @version $id$
- * @author Michael Berkowski <mjb@umn.edu>
  */
 require_once('rpc_config.inc.php');
 class RPC_DB

@@ -30,8 +30,6 @@
  * Some values are created dynamically in the constructor
  *
  * @package RPC
- * @version $id$
- * @author Michael Berkowski <mjb@umn.edu>
  */
 
 require_once('rpc_version.inc.php');

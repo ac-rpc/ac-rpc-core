@@ -28,8 +28,6 @@ require_once('rpc_user.inc.php');
  * Assignment linked for users who don't own them
  *
  * @package RPC
- * @version $id$
- * @author Michael Berkowski <mjb@umn.edu>
  */
 class RPC_Linked_Assignment
 {	const ERR_NO_SUCH_OBJECT = 11;

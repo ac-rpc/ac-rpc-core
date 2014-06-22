@@ -26,8 +26,6 @@ require_once('rpc_step_base.inc.php');
  *
  * @uses RPC_Step_Base
  * @package RPC
- * @version $id$
- * @author Michael Berkowski <mjb@umn.edu>
  */
 class RPC_Step extends RPC_Step_Base
 {

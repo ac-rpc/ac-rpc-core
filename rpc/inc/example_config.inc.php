@@ -26,8 +26,6 @@
  * Values stored in the $CONF[] array will be used
  *
  * @package RPC
- * @version $id$
- * @author Michael Berkowski <mjb@umn.edu>
  * to create the application's basic configuration.
  */
 
