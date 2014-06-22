@@ -1,7 +1,7 @@
 ## Research Project Calculator Authentication Plugins
 By default, the RPC ships with a "native" authentication plugin. You may create a custom plugin to interface with your institution's user systems.  We would welcome contributions for LDAP or other common systems.
 
-**Note:** This API isn't all that well tested yet.  Minitex will be happy to assist with your implementations if you run into problems. Just [[https://www.minitex.umn.edu/Contact/|contact us]], attn: Michael Berkowski.
+**Note:** This API isn't all that well tested yet.  I may be able to offer advice on your implementations if you run into problems. Contact Michael Berkowski `mjb [--AT--] umn.edu`. 
 
 ### API
 #### Required Function
