@@ -89,7 +89,7 @@ Research Project Calculator configuration is stored in `inc/config.inc.php`.
 
 ### Get Started
  - Login as the address specified in `AUTH_SUPERUSER`
- - No assignment templates have been created in your installation. You can create them manually, or if you would like to copy the ones used by Minitex, [[https://www.minitex.umn.edu/Contact/|contact us]] with a message sent to the attention of Link Swanson.
+ - No assignment templates have been created in your installation. You can create them manually, or if you would like to copy the ones used by Minitex, [contact Minitex](https://www.minitex.umn.edu/Contact/) with a message sent to the attention of Link Swanson.
 
 ### User Types & Administration
  - [User type descriptions and administration](useradmin.md)
