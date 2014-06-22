@@ -33,8 +33,6 @@ require_once('rpc_user.inc.php');
  * Sets up basic common configurations and template variables
  *
  * @package RPC
- * @version $id$
- * @author Michael Berkowski <mjb@umn.edu>
  */
 class RPC_Smarty extends Smarty
 {

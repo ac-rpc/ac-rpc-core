@@ -24,8 +24,6 @@
  * Local user object
  * 
  * @package RPC
- * @version $id$
- * @author Michael Berkowski <mjb@umn.edu>
  */
 class RPC_User
 {

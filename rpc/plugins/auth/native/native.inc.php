@@ -24,7 +24,6 @@
  * Stores local users with passwords, using email address as username
  *
  * @package RPC
- * @author Michael Berkowski <mjb@umn.edu>
  */
 require_once('native_user.inc.php');
 /**

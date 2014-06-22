@@ -26,8 +26,6 @@ require_once('rpc_user.inc.php');
  * Base class for assignment and template objects
  *
  * @package RPC
- * @version $id$
- * @author Michael Berkowski <mjb@umn.edu>
  */
 abstract class RPC_Assignment_Base
 {

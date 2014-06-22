@@ -26,8 +26,6 @@
  *
  * @abstract
  * @package RPC
- * @version $id$
- * @author Michael Berkowski <mjb@umn.edu>
  */
 abstract class RPC_Step_Base
 {

@@ -34,8 +34,6 @@ require_once('html2text.php');
  * code injection vulnerabilities.
  *
  * @package RPC
- * @version $id$
- * @author Michael Berkowski <mjb@umn.edu>
  */
 class RPC_Notification
 {

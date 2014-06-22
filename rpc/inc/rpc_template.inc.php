@@ -28,8 +28,6 @@ require_once('rpc_user.inc.php');
  * Assignment as a complete project defined by a user
  *
  * @package RPC
- * @version $id$
- * @author Michael Berkowski <mjb@umn.edu>
  */
 class RPC_Template extends RPC_Assignment_Base
 {

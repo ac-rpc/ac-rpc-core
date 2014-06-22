@@ -26,8 +26,6 @@ require_once('rpc_user.inc.php');
  *
  * @abstract
  * @package RPC
- * @version $id$
- * @author Michael Berkowski <mjb@umn.edu>
  */
 abstract class RPC
 {
