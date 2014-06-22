@@ -25,14 +25,7 @@ if (PHP_SAPI !== "cli")
 {
 	exit(0);
 }
-define('RPC_BASE_DIR', dirname(__FILE__) . "/..");
-require_once(RPC_BASE_DIR . '/inc/rpc.inc.php');
-require_once(RPC_BASE_DIR . '/inc/rpc_config.inc.php');
-require_once(RPC_BASE_DIR . '/inc/rpc_db.inc.php');
-require_once(RPC_BASE_DIR . '/inc/rpc_notification.inc.php');
-require_once(RPC_BASE_DIR . '/inc/rpc_assignment.inc.php');
-require_once(RPC_BASE_DIR . '/inc/rpc_step.inc.php');
-require_once(RPC_BASE_DIR . '/inc/rpc_user.inc.php');
+require_once(__DIR__ . '/../../vendor/autoload.php');
 
 // Application setup
 $config = RPC_Config::get_instance();

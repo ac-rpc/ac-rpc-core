@@ -19,7 +19,6 @@
  * along with The RPC.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once('rpc_user.inc.php');
 /**
  * Class RPC
  * Abstract class for application page/action setup
@@ -239,7 +238,6 @@ abstract class RPC
 	{
 		// First call the auth plugin's rpc_logout()
 		// if it has been prototyped.
-		require_once(self::$_config->app_file_path . '/plugins/auth/' . self::$_config->auth_plugin . '/' . self::$_config->auth_plugin . '.inc.php');
 		if (function_exists('rpc_logout'))
 		{
 			rpc_logout(self::$_active_user);

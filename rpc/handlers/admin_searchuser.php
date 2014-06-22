@@ -23,10 +23,7 @@
  * Administrator AJAX handler for user searching.
  * Outputs pipe-delimited text as username|email|name|is_publisher|is_administrator|error_string
  */
-require_once(dirname(__FILE__) . '/../inc/rpc.inc.php');
-require_once(dirname(__FILE__) . '/../inc/rpc_config.inc.php');
-require_once(dirname(__FILE__) . '/../inc/rpc_db.inc.php');
-require_once(dirname(__FILE__) . '/../inc/rpc_user.inc.php');
+require_once(__DIR__ . '/../../vendor/autoload.php');
 
 // Application setup
 $config = RPC_Config::get_instance();

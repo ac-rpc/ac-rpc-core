@@ -33,9 +33,6 @@
  */
 
 require_once('rpc_version.inc.php');
-// Initialize config array before reading its values...
-$GLOBALS['CONF'] = array();
-require_once('config.inc.php');
 class RPC_Config
 {
 	const ERR_INVALID_CONFIG = 1;
@@ -244,6 +241,14 @@ class RPC_Config
 	 */
 	private function __construct()
 	{
+		// Initialize config array before reading its values...
+		if (!isset($GLOBALS['CONF']))
+		{
+			$GLOBALS['CONF'] = array();
+		}
+		global $CONF;
+		require_once(__DIR__ . '/config.inc.php');
+
 		// Config file was found, but had nothing useful
 		if (sizeof($GLOBALS['CONF']) == 0)
 		{

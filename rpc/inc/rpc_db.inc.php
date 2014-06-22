@@ -26,7 +26,6 @@
  *
  * @package RPC
  */
-require_once('rpc_config.inc.php');
 class RPC_DB
 {
 	/**

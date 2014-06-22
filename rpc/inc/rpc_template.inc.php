@@ -19,10 +19,6 @@
  * along with The RPC.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once('rpc.inc.php');
-require_once('rpc_assignment_base.inc.php');
-require_once('rpc_step.inc.php');
-require_once('rpc_user.inc.php');
 /**
  * Class RPC_Template
  * Assignment as a complete project defined by a user

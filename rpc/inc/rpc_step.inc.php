@@ -19,7 +19,6 @@
  * along with The RPC.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once('rpc_step_base.inc.php');
 /**
  * RPC_Step
  * Assignment step description

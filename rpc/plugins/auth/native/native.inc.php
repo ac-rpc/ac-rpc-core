@@ -25,7 +25,6 @@
  *
  * @package RPC
  */
-require_once('native_user.inc.php');
 /**
  * Mandatory function for plugin authentication
  * Returns pipe-delimited authentication string in the format:

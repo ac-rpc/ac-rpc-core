@@ -19,12 +19,7 @@
  * along with The RPC.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-define('BASE_DIR', dirname(__FILE__) . '/../');
-require_once(BASE_DIR . '/inc/rpc.inc.php');
-require_once(BASE_DIR . '/inc/rpc_config.inc.php');
-require_once(BASE_DIR . '/inc/rpc_db.inc.php');
-require_once(BASE_DIR . '/inc/rpc_smarty.inc.php');
-require_once(BASE_DIR . '/inc/rpc_user.inc.php');
+require_once(__DIR__ . '/../../vendor/autoload.php');
 
 // Application setup
 $config = RPC_Config::get_instance();

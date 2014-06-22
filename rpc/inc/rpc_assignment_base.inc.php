@@ -19,8 +19,6 @@
  * along with The RPC.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once('rpc.inc.php');
-require_once('rpc_user.inc.php');
 /**
  * Class RPC_Assignment_Base
  * Base class for assignment and template objects

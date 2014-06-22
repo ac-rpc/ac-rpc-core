@@ -22,15 +22,7 @@
 /**
  * AJAX handler script for assignment modifications
  */
-require_once(dirname(__FILE__) . '/../inc/rpc.inc.php');
-require_once(dirname(__FILE__) . '/../inc/rpc_config.inc.php');
-require_once(dirname(__FILE__) . '/../inc/rpc_db.inc.php');
-require_once(dirname(__FILE__) . '/../inc/rpc_smarty.inc.php');
-require_once(dirname(__FILE__) . '/../inc/rpc_user.inc.php');
-require_once(dirname(__FILE__) . '/../inc/rpc_step.inc.php');
-require_once(dirname(__FILE__) . '/../inc/rpc_assignment.inc.php');
-require_once(dirname(__FILE__) . '/../inc/rpc_template.inc.php');
-require_once(dirname(__FILE__) . '/../inc/rpc_linked_assignment.inc.php');
+require_once(__DIR__ . '/../../vendor/autoload.php');
 
 // Application setup
 $config = RPC_Config::get_instance();

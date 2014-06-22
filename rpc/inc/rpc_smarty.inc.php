@@ -20,14 +20,6 @@
  */
 
 // Needs Smarty base class in include path
-require_once('Smarty/libs/Smarty.class.php');
-require_once('rpc.inc.php');
-require_once('rpc_assignment_base.inc.php');
-require_once('rpc_assignment.inc.php');
-require_once('rpc_template.inc.php');
-require_once('rpc_linked_assignment.inc.php');
-require_once('rpc_step.inc.php');
-require_once('rpc_user.inc.php');
 /**
  * Wrapper for Smarty templating
  * Sets up basic common configurations and template variables

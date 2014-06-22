@@ -19,8 +19,6 @@
  * along with The RPC.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once(dirname(__FILE__) . "/../../../inc/rpc_user.inc.php");
-require_once(dirname(__FILE__) . "/../../../inc/rpc_smarty.inc.php");
 /**
  * Class Native_User
  * RPC users utilizing the 'native' authentication plugin
