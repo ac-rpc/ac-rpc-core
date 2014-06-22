@@ -7,7 +7,7 @@ Please [|join the RPC-development mailing list](http://lists.minitex.umn.edu/mai
 
 ### System Requirements
 #### Server Requirements
- - A web server (Apache, IIS, etc) running PHP 5.1.2 or later  ''Only UNIX/Apache information is supplied in this guide.''
+ - A web server (Apache, IIS, etc) running PHP 5.1.2 or later  (**Only UNIX/Apache information is supplied in this**) guide.''
  - A MySQL 5.0+ database
  - The ability to run cron jobs or scheduled tasks
  - The ability to send mail from PHP using the mail() function
