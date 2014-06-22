@@ -261,7 +261,9 @@ abstract class RPC_Step_Base
 			"<img>"
 		);
 		$stripped = strip_tags($string, implode("", $arr_tags_allowed));
-		return preg_replace('/<(.*?)>/ie', "'<' .self::step_strip_tag_attributes('\\1'). '>'", $stripped);
+		return preg_replace_callback('/<(.*?)>/i', function($m) {
+      return "<" . self::step_strip_tag_attributes($m[1]) . ">";
+    }, $stripped);
 	}
 	/**
 	 * Disable unwanted HTML attributes from within tags
