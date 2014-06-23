@@ -34,21 +34,24 @@ CREATE TABLE users
 (
 	userid INTEGER UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT,
 	/* Usernames must be stored locally even when using auth API
-	 * Length 320 is to match maxlength of an email address
 	 */
-	username VARCHAR(320) NOT NULL,
+	username VARCHAR(255) NOT NULL,
 	/* NULL password is weird, but allows for auth API to store
 	 * local admin users w/o passwords since they're authenticated
 	 * by a remote system or plugin.
 	 */
 	password VARCHAR(256) NULL,
 	passwordsalt VARCHAR(10) NOT NULL DEFAULT '',
-	email VARCHAR(320) NOT NULL UNIQUE,
+	hashtype VARCHAR(16) NOT NULL DEFAULT '',
+	email VARCHAR(255) NOT NULL UNIQUE,
 	name VARCHAR(256) NULL,
 	usertype VARCHAR(10) NOT NULL DEFAULT 'STUDENT',
 	/* Default permissions is 'user' 001 */
 	perms INTEGER NOT NULL DEFAULT 1,
-	token VARCHAR(64) NULL
+	token VARCHAR(64) NULL,
+	last_login DATETIME NULL,
+	reset_token VARCHAR(128) NULL,
+	reset_token_expires DATETIME NULL
 ) ENGINE=InnoDB;
 
 /**

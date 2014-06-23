@@ -42,11 +42,18 @@ class Native_User extends RPC_User
 	public $password_hash;
 	/**
 	 * Password salt
+	 * Obsolete for passwords hashed by password_hash()
 	 *
 	 * @var string
 	 * @access private
 	 */
 	private $salt;
+	/**
+	 * Hashing algorithm (legacy sha1 or bcrypt)
+	 * @var string
+	 * @access private
+	 */
+	private $hashtype;
 	/**
 	 * Authentication session ID used to identify browser session and paired with token
 	 * A single user may have several valid sessions in different browser cookies.
@@ -63,6 +70,16 @@ class Native_User extends RPC_User
 	 * @access public
 	 */
 	public $token;
+	/**
+	 * @var string
+	 * @access private
+	 */
+	private $reset_token;
+	/**
+	 * @var int
+	 * @access private
+	 */
+	private $reset_token_expires;
 	/**
 	 * User has successfully supplied credentials
 	 *
@@ -86,7 +103,7 @@ class Native_User extends RPC_User
 		$this->config = $config;
 		$this->db = $db;
 		$dbusername = $this->db->real_escape_string(strtoupper($username));
-		$qry = sprintf("SELECT userid, username, password, passwordsalt, email, name, usertype, perms, token FROM users WHERE UPPER(username) = '%s'", $dbusername);
+		$qry = sprintf("SELECT userid, username, password, passwordsalt, hashtype, email, name, usertype, perms, token FROM users WHERE UPPER(username) = '%s'", $dbusername);
 		if ($result = $this->db->query($qry))
 		{
 			// Got results, load object
@@ -98,11 +115,13 @@ class Native_User extends RPC_User
 				// and the empty string must be hashed.
 				$this->password_hash = $row['password'] !== NULL ? $row['password'] : sha1("");
 				$this->salt = $row['passwordsalt'];
+				$this->hashtype = $row['hashtype'];
 				$this->token = $row['token'];
 				$this->name = !empty($row['name']) ? htmlentities($row['name'], ENT_QUOTES) : htmlentities($row['username'], ENT_QUOTES);
 				$this->email = htmlentities($row['email'], ENT_QUOTES);
 				$this->type = $row['usertype'];
 				$this->raw_perms_int = intval($row['perms']);
+
 				// Check user, publisher, and admin bits
 				$this->is_user = $this->raw_perms_int & self::RPC_AUTHLEVEL_USER ? TRUE : FALSE;
 				$this->is_publisher = $this->raw_perms_int & self::RPC_AUTHLEVEL_PUBLISHER ? TRUE : FALSE;
@@ -176,37 +195,72 @@ class Native_User extends RPC_User
 	 */
 	public function validate_password($password, $stay_logged_in=FALSE)
 	{
-		$qry = sprintf("SELECT 1 FROM users WHERE username = '%s' AND password = '%s';",
-					$this->db->real_escape_string($this->username),
-					$this->db->real_escape_string(sha1($password . $this->salt))
-				);
-		if ($result = $this->db->query($qry))
+		// Validate legacy sha1 passwords, and rehash them if successful
+		if ($this->hashtype == 'sha1')
 		{
-			// Successful authentication
-			if ($result->num_rows === 1)
+			$qry = sprintf("SELECT 1 FROM users WHERE username = '%s' AND password = '%s';",
+			         $this->db->real_escape_string($this->username),
+		           $this->db->real_escape_string(sha1($password . $this->salt))
+			       );
+			if ($result = $this->db->query($qry))
 			{
-				$this->set_authenticated();
-
-				// If salt is blank (legacy user), call _set_password on the current pw
-				// This generates a new proper salt.
-				if ($this->salt === '')
+				if ($result->num_rows === 1)
 				{
+					// Legacy users need to be rehashed into bcrypt
 					if ($this->_set_password($password)) $this->db->commit();
+
+					$this->set_authenticated();
 				}
-				// Set a permanent cookie if requested
-				if ($stay_logged_in)
+				// Bad password
+				else
 				{
-					$this->start_session();
+					$this->error = self::ERR_INCORRECT_CREDS;
+					return FALSE;
 				}
-				return TRUE;
-			}
-			// Bad password
-			else
-			{
-				$this->error = self::ERR_INCORRECT_CREDS;
-				return FALSE;
 			}
 		}
+		else if ($this->hashtype == 'bcrypt')
+		{
+			$qry = sprintf("SELECT password FROM users WHERE username = '%s';", $this->db->real_escape_string($this->username));
+			if ($result = $this->db->query($qry))
+			{
+				// Successful authentication
+				if ($result->num_rows === 1)
+				{
+					$row = $result->fetch_assoc();
+					if (password_verify($password, $row['password']))
+					{
+						$this->set_authenticated();
+					}
+					// Bad password
+					else
+					{
+						$this->error = self::ERR_INCORRECT_CREDS;
+						return FALSE;
+					}
+				}
+				else
+				{
+					$this->error = self::ERR_INCORRECT_CREDS;
+					return FALSE;
+				}
+			}
+		}
+		// Invalid hash type - unhandled
+		else
+		{
+			return FALSE;
+		}
+		if ($this->is_authenticated)
+		{
+			// Set a permanent cookie if requested
+			if ($stay_logged_in)
+			{
+				$this->start_session();
+			}
+			return TRUE;
+		}
+		return FALSE;
 	}
 	/**
 	 * Set the user's status to authenticated. Also sets username in $_SESSION
@@ -218,6 +272,10 @@ class Native_User extends RPC_User
 	{
 		$this->is_authenticated = TRUE;
 		$_SESSION['username'] = $this->username;
+
+		// Update the login timestamp
+		$this->db->query("UPDATE users SET last_login = NOW() WHERE username = '%s';", $this->db->real_escape_string($this->username));
+		$this->db->commit();
 	}
 	/**
 	 * Create a new session id in native_sessions
@@ -411,12 +469,14 @@ QRY
 	 */
 	private function _set_password($newpassword)
 	{
-		$this->salt = self::_make_password();
-		$newpassword_hash = $this->db->real_escape_string(sha1($newpassword . $this->salt));
-		$qry = sprintf("UPDATE users SET password = '%s', passwordsalt = '%s' WHERE userid = %u;", $newpassword_hash, $this->salt, $this->id);
+		$newpassword_hash = $this->db->real_escape_string(password_hash($newpassword, PASSWORD_DEFAULT));
+
+		// Updated hashes as bcrypt stores the salt with the hash, so the salt column is legacy
+		$qry = sprintf("UPDATE users SET password = '%s', passwordsalt = 'BCRYPT-UNUSED' hashtype = 'bcrypt'  WHERE userid = %u;", $newpassword_hash, $this->id);
 		if ($result = $this->db->query($qry))
 		{
 			$this->password_hash = $newpassword_hash;
+			$this->salt = NULL;
 			return TRUE;
 		}
 		else
@@ -435,7 +495,7 @@ QRY
 	 */
 	public function recover_password()
 	{
-		$newpass = self::_make_password();
+		$newpass = $this->_set_reset_token();
 		$smarty = new RPC_Smarty($this->config);
 		$smarty->assign('newpass', $newpass);
 
@@ -509,12 +569,13 @@ HEADERS;
 		return preg_match('/^.*(?=.{6,})(?=.*\d).*$/', $password);
 	}
 	/**
-	 * Create a new random passowrd, used for both password recovery and salt
+	 * Create a new random salt string, used with recovery tokens
+	 * In legacy systems this was used to set a new password for recovery
 	 *
 	 * @access private
 	 * @return string
 	 */
-	private static function _make_password()
+	private function _set_reset_token()
 	{
 		$newpass = '';
 		$arr_pass = array();
@@ -534,7 +595,56 @@ HEADERS;
 		shuffle($arr_pass);
 		// Stick it together as a string.
 		$newpass = implode('', $arr_pass);
-		return $newpass;
+		// Hash the username with the random string
+		$this->reset_token = sha1($this->username . $newpass);
+		$this->reset_token_expires = time() + 86400;
+
+		// Store the new token
+    $qry = sprintf("UPDATE users SET reset_token = '%s', reset_token_expires = NOW() + INTERVAL 1 DAY WHERE userid = %u", $this->reset_token, $this->id);
+    if ($this->db->query($qry))
+    {
+      $tihs->db->commit();
+      return $this->reset_token;
+    }
+    return FALSE;
 	}
+  /**
+   * Clear the reset token
+   *
+   * @access private
+   * @return bool
+   */
+  private function _clear_reset_token()
+  {
+    if ($this->db->query(sprintf("UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE userid = %u", $this->id)))
+    {
+      $this->db->commit();
+      return TRUE;
+    }
+    return FALSE;
+  }
+  /**
+   * Retrieve a Native_User object by reset token
+   *
+   * @param string $token
+   * @param RPC_Config $config
+   * @param MySQLi $db
+   * @static
+   * @access public
+   * @return Native_User
+   */
+  public static function get_user_by_token($token, $config, $db)
+  {
+    $qry = sprintf("SELECT username FROM users WHERE reset_token = '%s' AND reset_token_expires >= NOW()", $db->real_escape_string($token));
+    if ($result = $db->query($qry))
+    {
+      if ($result->num_rows === 1)
+      {
+        $row = $result->fetch_assoc();
+        $user = new self($row['username'], $config, $db);
+        $user->_clear_reset_token();
+      }
+    }
+  }
 }
 ?>
