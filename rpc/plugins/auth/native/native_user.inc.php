@@ -199,9 +199,9 @@ class Native_User extends RPC_User
 		if ($this->hashtype == 'sha1')
 		{
 			$qry = sprintf("SELECT 1 FROM users WHERE username = '%s' AND password = '%s';",
-			         $this->db->real_escape_string($this->username),
-		           $this->db->real_escape_string(sha1($password . $this->salt))
-			       );
+				$this->db->real_escape_string($this->username),
+				$this->db->real_escape_string(sha1($password . $this->salt))
+		  );
 			if ($result = $this->db->query($qry))
 			{
 				if ($result->num_rows === 1)
@@ -274,7 +274,7 @@ class Native_User extends RPC_User
 		$_SESSION['username'] = $this->username;
 
 		// Update the login timestamp
-		$this->db->query("UPDATE users SET last_login = NOW() WHERE username = '%s';", $this->db->real_escape_string($this->username));
+		$this->db->query(sprintf("UPDATE users SET last_login = NOW() WHERE username = '%s';", $this->db->real_escape_string($this->username)));
 		$this->db->commit();
 	}
 	/**
@@ -469,14 +469,17 @@ QRY
 	 */
 	private function _set_password($newpassword)
 	{
-		$newpassword_hash = $this->db->real_escape_string(password_hash($newpassword, PASSWORD_DEFAULT));
+		$newpassword_hash = $this->db->real_escape_string(password_hash($newpassword, PASSWORD_DEFAULT, array('cost' => 12)));
 
 		// Updated hashes as bcrypt stores the salt with the hash, so the salt column is legacy
-		$qry = sprintf("UPDATE users SET password = '%s', passwordsalt = 'BCRYPT-UNUSED' hashtype = 'bcrypt'  WHERE userid = %u;", $newpassword_hash, $this->id);
+		$hashinfo = password_get_info($newpassword_hash);
+		$qry = sprintf("UPDATE users SET password = '%s', passwordsalt = 'BCRYPT-UNUSED', hashtype = '%s'  WHERE userid = %u;", $newpassword_hash, $hashinfo['algoName'], $this->id);
 		if ($result = $this->db->query($qry))
 		{
+			$this->db->commit();
 			$this->password_hash = $newpassword_hash;
 			$this->salt = NULL;
+			$this->hashtype = 'bcrypt';
 			return TRUE;
 		}
 		else
@@ -603,8 +606,8 @@ HEADERS;
     $qry = sprintf("UPDATE users SET reset_token = '%s', reset_token_expires = NOW() + INTERVAL 1 DAY WHERE userid = %u", $this->reset_token, $this->id);
     if ($this->db->query($qry))
     {
-      $tihs->db->commit();
-      return $this->reset_token;
+			$this->db->commit();
+			return $this->reset_token;
     }
     return FALSE;
 	}
@@ -618,8 +621,8 @@ HEADERS;
   {
     if ($this->db->query(sprintf("UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE userid = %u", $this->id)))
     {
-      $this->db->commit();
-      return TRUE;
+			$this->db->commit();
+			return TRUE;
     }
     return FALSE;
   }
@@ -638,13 +641,16 @@ HEADERS;
     $qry = sprintf("SELECT username FROM users WHERE reset_token = '%s' AND reset_token_expires >= NOW()", $db->real_escape_string($token));
     if ($result = $db->query($qry))
     {
-      if ($result->num_rows === 1)
-      {
-        $row = $result->fetch_assoc();
-        $user = new self($row['username'], $config, $db);
-        $user->_clear_reset_token();
-      }
+			if ($result->num_rows === 1)
+			{
+				$row = $result->fetch_assoc();
+				$user = new self($row['username'], $config, $db);
+				$user->_clear_reset_token();
+
+				return $user;
+			}
     }
+    return FALSE;
   }
 }
 ?>
