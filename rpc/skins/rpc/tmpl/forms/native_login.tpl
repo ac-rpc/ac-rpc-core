@@ -4,6 +4,9 @@
 			{if isset($login_error)}
 			<div class='errormsg'>{$login_error}</div>
 			{/if}
+			{if isset($login_success)}
+			<div class='successmsg'>{$login_success}</div>
+			{/if}
 			<form id='form-login-form' method='post' action='{$login_handler}'>
 				<fieldset id='fieldset-login-form'>
 					<input type='hidden' name='transid' value='{$transid}' />

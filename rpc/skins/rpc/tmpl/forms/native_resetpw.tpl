@@ -6,7 +6,7 @@
 			{/if}
 			{if not isset($acct_success)}
 			<p class='instructions'>
-				Enter your email address below and a new randomly selected password will be emailed to you.
+				Enter your email address below to be sent password recovery information.
 			</p>
 			<form id='form-acct-resetpw' method='post' action='{$acct_handler}'>
 				<fieldset id='fieldset-acct-resetpw'>
@@ -19,7 +19,7 @@
 						</li>
 						<li>
 							<span class='assignment-label fixed-label label-spacer'></span>
-							<input type='submit' name='submit' value='Email me a new password' id='resetpw-submit' />
+							<input type='submit' name='submit' value='Recover Password' id='resetpw-submit' />
 						</li>
 					</ol>
 				</fieldset>

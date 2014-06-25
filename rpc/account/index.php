@@ -42,6 +42,8 @@ switch ($account_action)
 		{
 			$smarty->assign('acct_action', 'resetpw');
 			$smarty->assign('acct_handler', $config->app_fixed_web_path . "account/?acct=resetpw");
+
+			// Initiating a reset by email
 			if (isset($_POST['username']) && isset($_POST['transid']))
 			{
 				// Verify form isn't being resubmitted.  $_SESSION['transid'] won't be set if resubmitted
@@ -65,22 +67,81 @@ switch ($account_action)
 					{
 						$reset_user->recover_password();
 						unset($_SESSION['transid']);
-						$smarty->assign('acct_success', 'A new password has been emailed to ' . htmlentities($_POST['username']) . " (<a href='{$config->app_relative_web_path}?acct=login'>Login</a>)");
+						$smarty->assign('acct_success', 'Password recovery information has been emailed to ' . htmlentities($_POST['username']));
+						$form = 'forms/native_resetpw.tpl';
 					}
 				}
+			}
+			// Received a token, requesting a reset form
+			else if (isset($_GET['token']))
+			{
+				// We found the user, show a reset form
+				if ($reset_user = Native_User::get_user_by_token($_GET['token'], $config, $db))
+				{
+					// $_SESSION['transid'] = md5(time() . rand());
+					// $smarty->assign('transid', $_SESSION['transid']);
+					$smarty->assign('token', htmlspecialchars($_GET['token']));
+					$form = 'forms/native_resetpw_token.tpl';
+				}
+				// Didn't find the user with this valid token
+				else
+				{
+					$smarty->assign('login_error', "The reset link you used is not valid");
+					$smarty->assign('login_handler', $config->app_relative_web_path . '?acct=login');
+					$form = 'forms/native_login.tpl';
+				}
+			}
+			// Received new passwords with token
+			else if (isset($_POST['password']) && isset($_POST['password-confirm']) && isset($_POST['token']))
+			{
+				if (isset($_SESSION['transid']) && $_SESSION['transid'] == $_POST['transid'])
+				{
+					if ($reset_user = Native_User::get_user_by_token($_POST['token'], $config, $db))
+					{
+						if ($_POST['password'] == $_POST['password-confirm'] && Native_User::password_meets_complexity($_POST['password']))
+						{
+							if ($reset_user->set_password(NULL, $_POST['password'], TRUE))
+							{
+								$reset_user->clear_reset_token();
+								$smarty->assign('login_success', "Your password has been updated. Please <a href='" . $config->app_relative_web_path . "?acct=login'>login</a> with your new password.");
+								$smarty->assign('login_handler', $config->app_relative_web_path . '?acct=login');
+								// $_SESSION['transid'] = md5(time() . rand());
+								// $smarty->assign('transid', $_SESSION['transid']);
+								$form = 'forms/native_login.tpl';
+							}
+						}
+						else
+						{
+							$smarty->assign('acct_error', "Passwords do not match or do not meet complexity requirement");
+							// $_SESSION['transid'] = md5(time() . rand());
+							// $smarty->assign('transid', $_SESSION['transid']);
+							$smarty->assign('token', htmlspecialchars($_POST['token']));
+							$form = 'forms/native_resetpw_token.tpl';
+						}
+					}
+					else
+					{
+						$smarty->assign('acct_error', "The reset link you used is not valid");
+						$smarty->assign('login_handler', $config->app_relative_web_path . '?acct=login');
+						$form = 'forms/native_login.tpl';
+					}
+				}
+				
 			}
 			// Otherwise, show the form
 			else
 			{
 				$_SESSION['transid'] = md5(time() . rand());
 				$smarty->assign('transid', $_SESSION['transid']);
+				$form = 'forms/native_resetpw.tpl';
 			}
 		}
 		// No caching for form displays.
+		$_SESSION['transid'] = md5(time() . rand());
+		$smarty->assign('transid', $_SESSION['transid']);
 		header('Cache-control: private');
 		header('Pragma: no-cache');
-		$smarty->skin_display('forms/native_resetpw.tpl');
-		exit();
+		$smarty->skin_display($form);
 		break;
 
 	/************************  NEW ACCOUNT CREATION *****************************/

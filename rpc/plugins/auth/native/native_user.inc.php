@@ -273,9 +273,11 @@ class Native_User extends RPC_User
 		$this->is_authenticated = TRUE;
 		$_SESSION['username'] = $this->username;
 
-		// Update the login timestamp
-		$this->db->query(sprintf("UPDATE users SET last_login = NOW() WHERE username = '%s';", $this->db->real_escape_string($this->username)));
-		$this->db->commit();
+		// Invalidate reset tokens
+		if (!empty($this->reset_token)) {
+			$this->clear_reset_token();
+		}
+		$this->_update_last_login();
 	}
 	/**
 	 * Create a new session id in native_sessions
@@ -439,12 +441,13 @@ QRY
 	 *
 	 * @param string $oldpassword
 	 * @param string $newpassword
+	 * @param boolean $force Force the password to change even if the correct old password wasn't supplied
 	 * @access public
 	 * @return boolean
 	 */
-	public function set_password($oldpassword, $newpassword)
+	public function set_password($oldpassword, $newpassword, $force = FALSE)
 	{
-		if ($this->password_hash !== sha1($oldpassword . $this->salt))
+		if ($force == FALSE && !password_verify($oldpassword, $this->password_hash))
 		{
 			$this->error = self::ERR_INCORRECT_CREDS;
 			return FALSE;
@@ -489,6 +492,22 @@ QRY
 		}
 	}
 	/**
+	 * Update the last_login timestamp
+	 * 
+	 * @access private
+	 * @return bool
+	 */
+	private function _update_last_login()
+	{
+		// Update the login timestamp
+		if ($this->db->query(sprintf("UPDATE users SET last_login = NOW() WHERE username = '%s';", $this->db->real_escape_string($this->username))))
+		{
+			$this->db->commit();
+			return TRUE;
+		}
+		return FALSE;
+	}
+	/**
 	 * Set a new random password for the user and send
 	 * it via a password reminder email
 	 * Note: This database action does NOT get committed until $this->db->commit() is called!
@@ -498,9 +517,9 @@ QRY
 	 */
 	public function recover_password()
 	{
-		$newpass = $this->_set_reset_token();
+		$token = $this->_set_reset_token();
 		$smarty = new RPC_Smarty($this->config);
-		$smarty->assign('newpass', $newpass);
+		$smarty->assign('token', $token);
 
 		// Set headers
 		$version = phpversion();
@@ -511,26 +530,14 @@ HEADERS;
 
 		// Build mail body from template
 		$mail_body = $smarty->global_fetch('notifications/native_pw_recovery.tpl');
-		// Update the database
-		if ($this->_set_password($newpass))
+		// Send the email notification
+		if (mail($this->email, $this->config->app_long_name . " password recovery", $mail_body, $headers, "-f{$this->config->app_email_from_address}"))
 		{
-			// Send the email notification
-			if (mail($this->email, $this->config->app_long_name . " password recovery", $mail_body, $headers, "-f{$this->config->app_email_from_address}"))
-			{
-				// We have to commit here, or the password reset could be only partially completed!
-				$this->db->commit();
-				return TRUE;
-			}
-			else
-			{
-				$this->db->rollback();
-				$this->error = self::ERR_CANNOT_SEND_PASSWORD;
-				return FALSE;
-			}
+			return TRUE;
 		}
 		else
 		{
-			$this->error = self::ERR_DB_ERROR;
+			$this->error = self::ERR_CANNOT_SEND_PASSWORD;
 			return FALSE;
 		}
 	}
@@ -617,12 +624,12 @@ HEADERS;
    * @access private
    * @return bool
    */
-  private function _clear_reset_token()
+  public function clear_reset_token()
   {
     if ($this->db->query(sprintf("UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE userid = %u", $this->id)))
     {
-			$this->db->commit();
-			return TRUE;
+		$this->db->commit();
+		return TRUE;
     }
     return FALSE;
   }
@@ -641,14 +648,13 @@ HEADERS;
     $qry = sprintf("SELECT username FROM users WHERE reset_token = '%s' AND reset_token_expires >= NOW()", $db->real_escape_string($token));
     if ($result = $db->query($qry))
     {
-			if ($result->num_rows === 1)
-			{
-				$row = $result->fetch_assoc();
-				$user = new self($row['username'], $config, $db);
-				$user->_clear_reset_token();
+		if ($result->num_rows === 1)
+		{
+			$row = $result->fetch_assoc();
+			$user = new self($row['username'], $config, $db);
 
-				return $user;
-			}
+			return $user;
+		}
     }
     return FALSE;
   }
