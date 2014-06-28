@@ -143,10 +143,8 @@ class RPC_Linked_Assignment
 		$qry = sprintf("SELECT assignid, userid, remind FROM linked_assignments WHERE linkid = %u;", $this->id);
 		if ($result = $this->db->query($qry))
 		{
-			if ($result->num_rows == 1)
+			if ($row = $result->fetch())
 			{
-				$row = $result->fetch_assoc();
-
 				// Check ownership. Only owner can view a linked assignment
 				if ($user == NULL || $row['userid'] != $user->id)
 				{
@@ -199,7 +197,8 @@ class RPC_Linked_Assignment
 				if ($steps_result = $this->db->query($steps_qry))
 				{
 					$arr_step_annotations = array();
-					while ($row = $steps_result->fetch_assoc())
+					$rows = $steps_result->fetchAll();
+					foreach ($rows as $row)
 					{
 						$arr_step_annotations[$row['stepid']]['annotation'] = $row['annotation'];
 						$arr_step_annotations[$row['stepid']]['reminder_sent_date'] = $row['remindersentdate'];
@@ -244,7 +243,8 @@ class RPC_Linked_Assignment
 		$qry = sprintf("SELECT id, annotation, reminder_sent_date FROM linked_steps_view WHERE linkid = %u;", $this->id);
 		if ($result = $this->db->query($qry))
 		{
-			while ($row = $result->fetch_assoc())
+			$rows = $result->fetchAll();
+			foreach ($rows as $row)
 			{
 				$this->steps[$row['id']]->annotation = $row['annotation'];
 				$this->steps[$row['id']]->reminder_sent_date = $row['reminder_sent_date'];

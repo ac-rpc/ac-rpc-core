@@ -325,7 +325,8 @@ QRY
 		if ($result = $db->query($qry))
 		{
 			$arr_notifications = array();
-			while ($row = $result->fetch_assoc())
+			$rows = $result->fetchAll();
+			foreach ($rows as $row)
 			{
 				$arr_notifications[] = $row;
 			}

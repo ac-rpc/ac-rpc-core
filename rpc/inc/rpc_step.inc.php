@@ -144,10 +144,8 @@ QRY
 
 			if ($result = $this->db->query($qry))
 			{
-				if ($result->num_rows === 1)
+				if ($row = $result->fetch())
 				{
-					$row = $result->fetch_assoc();
-
 					// First get author and sharing information
 					$this->id = intval($row['id']);
 					$this->is_shared = $row['is_shared'] == 1 ? TRUE : FALSE;

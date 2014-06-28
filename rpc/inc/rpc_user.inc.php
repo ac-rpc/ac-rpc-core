@@ -223,7 +223,7 @@ class RPC_User
 		if ($result = $this->db->query($qry))
 		{
 			// Got results, load object
-			if ($row = $result->fetch_assoc())
+			if ($row = $result->fetch())
 			{
 				$this->id = intval($row['userid']);
 				$this->username = htmlentities($row['username'], ENT_QUOTES);
@@ -456,7 +456,8 @@ QRY
 		, $this->id, $qry_status, $qry_order);
 		if ($result = $this->db->query($qry))
 		{
-			while ($row = $result->fetch_assoc())
+			$rows = $result->fetchAll();
+			foreach ($rows as $row)
 			{
 				// Build URLs
 				if ($row['linkid'])
@@ -531,7 +532,8 @@ QRY
 		, $this->id, $days);
 		if ($result = $this->db->query($qry))
 		{
-			while ($row = $result->fetch_assoc())
+			$rows = $result->fetchAll();
+			foreach ($rows as $row)
 			{
 				// Build URLs
 				if ($row['linkid'])
@@ -603,7 +605,8 @@ QRY;
 		if($result = $user->db->query($qry_sel . $qry_where))
 		{
 			$arr_templates = array();
-			while ($row = $result->fetch_assoc())
+			$rows = $result->fetchAll();
+			foreach ($rows as $row)
 			{
 				// Add edit permissions to each row
 				// 
@@ -916,7 +919,8 @@ QRY;
 		$qry = "SELECT username FROM users WHERE perms & " . self::RPC_AUTHLEVEL_ADMINISTRATOR . " <> 0 ORDER BY username ASC;";
 		if ($result = $db->query($qry))
 		{
-			while ($row = $result->fetch_assoc())
+			$rows = $result->fetchAll();
+			foreach ($rows as $row)
 			{
 				$arr_administrators[] = $row['username'];
 			}
@@ -942,7 +946,8 @@ QRY;
 		$qry = "SELECT username FROM users WHERE perms & " . self::RPC_AUTHLEVEL_PUBLISHER . " <> 0 ORDER BY username ASC;";
 		if ($result = $db->query($qry))
 		{
-			while ($row = $result->fetch_assoc())
+			$rows = $result->fetchAll();
+			foreach ($rows as $row)
 			{
 				$arr_publishers[] = $row['username'];
 			}
@@ -980,7 +985,8 @@ QRY;
 QRY;
 		if ($result = $db->query($qry))
 		{
-			while ($row = $result->fetch_assoc())
+			$rows = $result->fetchAll();
+			foreach ($rows as $row)
 			{
 				$uname = htmlentities($row['username'], ENT_QUOTES);
 				$arr_privileged_users[$uname]['id'] = $row['userid'];

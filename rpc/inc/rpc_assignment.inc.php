@@ -201,10 +201,8 @@ QRY
 			if ($result = $this->db->query($qry))
 			{
 				// Assignment not located
-				if ($result->num_rows === 1)
+				if ($row = $result->fetch())
 				{
-					$row = $result->fetch_assoc();
-
 					// First get author and sharing information
 					$this->_active_userid = $user->id;
 					$this->id = intval($row['id']);

@@ -107,7 +107,7 @@ class Native_User extends RPC_User
 		if ($result = $this->db->query($qry))
 		{
 			// Got results, load object
-			if ($row = $result->fetch_assoc())
+			if ($row = $result->fetch())
 			{
 				$this->id = intval($row['userid']);
 				$this->username = htmlentities($row['username'], ENT_QUOTES);
@@ -204,7 +204,7 @@ class Native_User extends RPC_User
 		    );
 			if ($result = $this->db->query($qry))
 			{
-				if ($result->num_rows === 1)
+				if ($row = $result->fetch())
 				{
 					// Legacy users need to be rehashed into bcrypt
 					$this->db->beginTransaction();
@@ -229,9 +229,8 @@ class Native_User extends RPC_User
 			if ($result = $this->db->query($qry))
 			{
 				// Successful authentication
-				if ($result->num_rows === 1)
+				if ($row = $result->fetch())
 				{
-					$row = $result->fetch_assoc();
 					if (password_verify($password, $row['password']))
 					{
 						$this->set_authenticated();
@@ -687,11 +686,9 @@ HEADERS;
     $qry = sprintf("SELECT username FROM users WHERE reset_token = '%s' AND reset_token_expires >= NOW()", $db->real_escape_string($token));
     if ($result = $db->query($qry))
     {
-		if ($result->num_rows === 1)
+		if ($row = $result->fetch())
 		{
-			$row = $result->fetch_assoc();
 			$user = new self($row['username'], $config, $db);
-
 			return $user;
 		}
     }

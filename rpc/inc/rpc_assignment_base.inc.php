@@ -220,7 +220,8 @@ abstract class RPC_Assignment_Base
 		$qry = sprintf("SELECT stepid, position FROM steps WHERE assignid=%u ORDER BY position, reminderdate;", $this->id);
 		if ($result = $this->db->query($qry))
 		{
-			while ($row = $result->fetch_assoc())
+			$rows = $result->fetchAll();
+			foreach ($rows as $row)
 			{
 				$this->steps[$row['stepid']] = new RPC_Step($row['stepid'], $user, $this->config, $this->db);
 			}
@@ -272,7 +273,8 @@ abstract class RPC_Assignment_Base
 		if ($result = $this->db->query($qry))
 		{
 			$arr_raw_steps = array();
-			while ($row = $result->fetch_assoc())
+			$rows = $result->fetchAll();
+			foreach ($rows as $row)
 			{
 				$arr_raw_steps[] = $row;
 			}
