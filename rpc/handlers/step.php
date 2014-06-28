@@ -66,6 +66,7 @@ else
 		}
 		else
 		{
+			$assign->db->beginTransaction();
 			switch ($_POST['action'])
 			{
 				case RPC_Step::ACTION_MOVE_TO_POS:
@@ -92,6 +93,7 @@ else
 							{
 								// Have to commit change now before normalizing.
 								$assign->db->commit();
+								$assign->db->beginTransaction();
 								$assign->normalize_steps();
 								$assign->db->commit();
 							}
@@ -271,13 +273,13 @@ else
 			{
 				$rpc_success = "FAIL";
 				$rpc_error = !empty($step->error) ? $step->get_error() : $rpc_error;
-				$db->rollback();
+				$db->rollBack();
 			}
 			// Successful action
 			else
 			{
 				$rpc_success = "OK";
-				$db->commit();
+				if ($db->inTransaction()) $db->commit();
 			}
 		}
 	}

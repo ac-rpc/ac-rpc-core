@@ -180,7 +180,8 @@ abstract class RPC
 						// Permissions, if omitted from validation string will be RPC_AUTHLEVEL_USER
 						$create_email = !empty($arr_auth_user[2]) && RPC_User::validate_email($arr_auth_user[2]) ? $arr_auth_user[2] : "";
 						$create_perms = !empty($arr_auth_user[3]) ? $arr_auth_user[3] : RPC_User::RPC_AUTHLEVEL_USER;
-						$create_success = RPC_User::create($arr_auth_user[1], '', $create_email, 'STUDENT', $create_perms, self::$_db);
+						self::$_db->beginTransaction();
+						$create_success = RPC_User::create_user($arr_auth_user[1], '', $create_email, 'STUDENT', $create_perms, self::$_db);
 						if ($create_success)
 						{
 							self::$_db->commit();
@@ -188,6 +189,7 @@ abstract class RPC
 						else
 						{
 							// Fatal error creating user
+							self::$_db->rollBack();
 							$err = "Fatal error: Local user could not be created.";
 							echo $err;
 							error_log($_SERVER['SCRIPT_NAME'] . ": " . $err);

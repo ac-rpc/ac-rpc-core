@@ -745,6 +745,7 @@ QRY
 		// Store for user when set
 		if ($user)
 		{
+			$db->beginTransaction();
 			$assignment->_store($user);
 			// On successful store(), reload the whole object so permissions get set
 			if (empty($assignment->error))
@@ -755,7 +756,7 @@ QRY
 			}
 			else
 			{
-				$db->rollback();
+				$db->rollBack();
 				return $assignment;
 			}
 
@@ -821,6 +822,7 @@ QRY
 
 			if ($user)
 			{
+				$db->beginTransaction();
 				$new_assign->_store($user);
 				if (empty($new_assign->error))
 				{
@@ -830,7 +832,7 @@ QRY
 				}
 				else
 				{
-					$db->rollback();
+					$db->rollBack();
 					return FALSE;
 				}
 			}
@@ -841,6 +843,7 @@ QRY
 				$new_assign->steps[] = $step->duplicate($new_assign->id, $user, NULL);
 			}
 			// Set parent and ancestor
+			$db->beginTransaction();
 			$new_assign->parent = $template->id;
 			$new_assign->ancestral_template = $template->id;
 			// Then calculate and map in the due dates and log template usage
@@ -854,7 +857,7 @@ QRY
 				}
 				else
 				{
-					$db->rollback();
+					$db->rollBack();
 				}
 			}
 			else
@@ -900,6 +903,7 @@ QRY
 			$new_assign = self::create_blank($user, $orig_assignment->title . $title_append, $orig_assignment->class, $orig_assignment->start_date, $orig_assignment->due_date, FALSE, $config, $db);
 			if (empty($new_assign->error))
 			{
+				$db->beginTransaction();
 				// Set the new assignment's parent
 				$new_assign->parent = $orig_assignment->id;
 				// Duplicate all the original steps into the new assignment
@@ -921,7 +925,7 @@ QRY
 				}
 				else
 				{
-					$db->rollback();
+					$db->rollBack();
 				}
 			}
 			// May be in error state

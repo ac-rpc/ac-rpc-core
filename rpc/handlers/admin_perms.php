@@ -61,6 +61,7 @@ else
 		}
 		else
 		{
+			$db->beginTransaction();
 			// Set session user as authority to change perms
 			$perms_user->set_active_authority_user($user);
 			switch ($_POST['action'])
@@ -84,7 +85,7 @@ else
 			}
 			else
 			{
-				$db->rollback();
+				$db->rollBack();
 				$perms_success = "FAIL";
 				$perms_error_string = $perms_user->get_error();
 			}

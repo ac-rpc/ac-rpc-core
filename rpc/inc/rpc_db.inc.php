@@ -32,7 +32,7 @@ class RPC_DB
 	 * Connection singleton member
 	 * 
 	 * @param object $config RPC_Config configuration singleton
-	 * @var object MySQLi database connection
+	 * @var object PDO database connection
 	 * @static
 	 * @access private
 	 */
@@ -48,7 +48,7 @@ class RPC_DB
 	 * @param object $config RPC_Config configuration singleton
 	 * @static
 	 * @access public
-	 * @return object MySQLi database connection
+	 * @return object PDO database connection
 	 */
 	public static function get_connection($config)
 	{
@@ -62,21 +62,15 @@ class RPC_DB
 		}
 		if (self::$_connection == NULL)
 		{
-			self::$_connection = mysqli_init();
-			if (!self::$_connection)
+			try
 			{
-				$err = "Fatal error initiating to database connection. Please see your server's error log for details.";
-				echo $err;
-				error_log($err . ": (" . mysqli_connect_errno() . ") " . mysqli_connect_error());
-				exit();
+				self::$_connection = new \PDO("mysql:host={$config->db_host};dbname={$config->db_name};port={$config->db_port}", $config->db_user, $config->db_pass);
 			}
-			// Setup database options
-			self::$_connection->options(MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT = 0');
-			if (!self::$_connection->real_connect($config->db_host, $config->db_user, $config->db_pass, $config->db_name, $config->db_port))
+			catch (\PDOException $e)
 			{
 				$err = "Fatal error connecting to database. Please see your server's error log for details.";
 				echo $err;
-				error_log($err . ": (" . mysqli_connect_errno() . ") " . mysqli_connect_error());
+				error_log($err . ": (" . $e->getCode() . ") " . $e->getMessage());
 				exit();
 			}
 		}

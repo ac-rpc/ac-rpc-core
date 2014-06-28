@@ -334,6 +334,7 @@ QRY
 				$this->percent
 			);
 			// Success, return the new step
+			$this->db->beginTransAction();
 			if ($result = $this->db->query($qry))
 			{
 				$new_step_id = $this->db->insert_id;
@@ -342,6 +343,7 @@ QRY
 			}
 			else
 			{
+				$this->db->rollBack();
 				$this->error = self::ERR_DB_ERROR;
 				return FALSE;
 			}
@@ -496,6 +498,7 @@ QRY
 				$due_date,
 				$percent
 			);
+			$this->db->beginTransaction();
 			if ($result = $db->query($qry))
 			{
 				$new_step_id = $db->insert_id;
@@ -504,7 +507,7 @@ QRY
 			}
 			else
 			{
-				$db->rollback();
+				$db->rollBack();
 				return FALSE;
 			}
 		}

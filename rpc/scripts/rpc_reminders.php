@@ -107,6 +107,7 @@ if (count($rpc_pending_notifications) > 0)
 		// On success, update notification date in the database
 		else
 		{
+			$db->beginTransaction();
 			if ($notification['linkid'] != NULL)
 			{
 				$update_date_result = $rpc_current_step->set_linked_notify_date($notification['linkid']);
@@ -118,7 +119,7 @@ if (count($rpc_pending_notifications) > 0)
 				$rpc_notification_successes++;
 				$db->commit();
 			}
-			else $db->rollback();
+			else $db->rollBack();
 		}
 		// Either success or failure already, so elminate the RPC_Notification;
 		unset($rpc_notification);

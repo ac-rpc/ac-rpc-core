@@ -116,6 +116,7 @@ else
 		}
 		else
 		{
+			$db->beginTransaction();
 			switch ($rpc_post['action'])
 			{
 				case RPC_Assignment::ACTION_CLEAR:
@@ -264,7 +265,7 @@ else
 			{
 				$rpc_success = "FAIL";
 				$rpc_error = !empty($active_obj->error) ? $active_obj->get_error() : $rpc_error;
-				$db->rollback();
+				$db->rollBack();
 			}
 			// Successful action
 			else

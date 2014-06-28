@@ -395,6 +395,7 @@ QRY
 		// Insert and return...
 		else
 		{
+			$db->beginTransaction();
 			$stored = FALSE;
 			$template = new self(NULL, NULL, $config, $db);
 			$template->author = $user ? $user->id : NULL;
@@ -411,7 +412,7 @@ QRY
 			}
 			else
 			{
-				$db->rollback();
+				$db->rollBack();
 				return $template;
 			}
 			if (empty($template->error))
@@ -463,6 +464,7 @@ QRY
 			$new_template = self::create_blank($user, $title, $class, FALSE, $config, $db);
 			if (empty($new_template->error))
 			{
+				$db->beginTransaction();
 				// Duplicate all the original steps into the new assignment
 				foreach ($orig_template->steps as $step)
 				{
@@ -478,7 +480,7 @@ QRY
 				}
 				else
 				{
-			 		$db->rollback();
+			 		$db->rollBack();
 				}
 			}
 			return $new_template;
