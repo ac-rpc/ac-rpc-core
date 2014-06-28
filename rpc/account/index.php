@@ -210,12 +210,15 @@ switch ($account_action)
 								break;
 							// User doesn't already exist. Create it.
 							case RPC_User::RPC_NOT_EXISTS:
+								$db->beginTransaction();
+
 								$create_username = trim($_POST['username']);
 								$create_name = isset($_POST['name']) && trim($_POST['name']) != '' ? trim($_POST['name']) : "";
 								// Always create as regular user
 								$create_perms = RPC_User::RPC_AUTHLEVEL_USER;
 								$create_type = $_POST['usertype'];
 								$create_user_success = RPC_User::create_user($create_username, $create_name, $create_username, $create_type, $create_perms, $db);
+
 								if ($create_user_success)
 								{
 									// Build user object and set password
@@ -236,6 +239,7 @@ switch ($account_action)
 								}
 								else
 								{
+									$db->rollBack();
 									$err = 'Error: User could not be created. A database error occurred.';
 									error_log($err . ' (' . $db->errno . ') '. $db->error);
 									$smarty->assign('acct_error', $err);
@@ -301,6 +305,8 @@ switch ($account_action)
 				$modify_type_success = TRUE;
 				$modify_name_success = TRUE;
 				$acct_error = "";
+
+				$db->beginTransaction();
 				// If changing email address, verify the new address isn't already in use
 				// For native auth users, changing email also changes username.  For API auth
 				// users, only the email address will change.  Either way, it can't be in use already
@@ -353,7 +359,7 @@ switch ($account_action)
 				}
 				else
 				{
-					$db->rollback();
+					$db->rollBack();
 					$smarty->assign('transid', $_SESSION['transid']);
 					$smarty->assign('resubmit', $arr_resubmit);
 					$smarty->assign('acct_error', "Some fields could not be modified." . $acct_error);
@@ -367,6 +373,7 @@ switch ($account_action)
 				// Passwords must match and be minimum 6 characters
 				if ($_POST['password'] === $_POST['password-confirm'])
 				{
+					$db->beginTransaction();
 					if ($user->set_password($_POST['oldpassword'], $_POST['password']))
 					{
 						$db->commit();
@@ -379,24 +386,21 @@ switch ($account_action)
 						if ($user->error == Native_User::ERR_INCORRECT_CREDS)
 						{
 							$arr_resubmit['oldpassword'] = TRUE;
-							$smarty->assign('resubmit', $arr_resubmit);
-							$smarty->assign('transid', $_SESSION['transid']);
 							$smarty->assign('acct_error', "You entered your old password incorrectly.");
 						}
 						else if ($user->error == Native_User::ERR_PASWORD_COMPLEXITY_UNMET)
 						{
 							$arr_resubmit['password'] = TRUE;
-							$smarty->assign('resubmit', $arr_resubmit);
-							$smarty->assign('transid', $_SESSION['transid']);
 							$smarty->assign('acct_error', "New password must be at least 6 characters and contain at least one number.");
 						}
 						else
 						{
-							$db->rollback();
-							$smarty->assign('transid', $_SESSION['transid']);
-							$smarty->assign('resubmit', $arr_resubmit);
 							$smarty->assign('acct_error', "A database error occurred.");
 						}
+
+						$db->rollBack();
+						$smarty->assign('transid', $_SESSION['transid']);
+						$smarty->assign('resubmit', $arr_resubmit);
 					}
 				}
 				else
@@ -409,6 +413,7 @@ switch ($account_action)
 			/************************ DELTE ACCOUNT *****************************/
 			else if (isset($_POST['delete-confirm']) && isset($_SESSION['transid']) && $_POST['transid'] === $_SESSION['transid'])
 			{
+				$db->beginTransaction();
 				if ($user->delete_account())
 				{
 					$db->commit();
@@ -422,7 +427,7 @@ switch ($account_action)
 				}
 				else
 				{
-					$db->rollback();
+					$db->rollBack();
 					$smarty->assign('transid', $_SESSION['transid']);
 					$smarty->assign('acct_error', 'A database error occurred.  Your account could not be deleted.');
 				}
