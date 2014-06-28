@@ -668,7 +668,7 @@ function RPCStep(stepNode, parentAssignment) {
 
 	var idx = this.node.id.indexOf("_");
 	if (idx) {
-		this.stepId = parseInt(this.node.id.substring(idx + 1));
+		this.stepId = parseInt(this.node.id.substring(idx + 1), 10);
 		if (!this.stepId) {
 			console.error("Invalid RPCStep at node " + this.node.id);
 			return;
@@ -717,7 +717,7 @@ function RPCStep(stepNode, parentAssignment) {
 		// Percent node and widget for template types
 		case "template":
 			this.percentNode = dojo.query(".step-percent", this.node).pop();
-			this.percent = parseInt(this.percentNode.value) > 0 ? parseInt(this.percentNode.value) : 0;
+			this.percent = parseInt(this.percentNode.value, 10) > 0 ? parseInt(this.percentNode.value, 10) : 0;
 			// Dijit NumberSpinner attaches to percentNode
 			this.percentWidget = new dijit.form.NumberSpinner(rpc_NumberSpinnerSettings, this.percentNode);
 			this.percentWidget.attr("intermediateChanges", true);
@@ -849,7 +849,7 @@ RPCStep.prototype.percentOnChange = function(value) {
  */
 RPCStep.prototype.updatePercent = function() {
 	// Add up all step percents with this widget value and make sure they're <= 100
-	var sum = parseInt(this.percentWidget.value);
+	var sum = parseInt(this.percentWidget.value, 10);
 	var thisId = this.stepId;
 	dojo.forEach(this.parentAssignment.steps, function(step, i){
 		if (step.RPCStep.stepId != thisId) {
@@ -863,7 +863,7 @@ RPCStep.prototype.updatePercent = function() {
 	}
 	else {
 		// Update via AJAX
-		this.percent = parseInt(this.percentWidget.value);
+		this.percent = parseInt(this.percentWidget.value, 10);
 		dojo.style(dojo.query(".step-savepercent", this.node).pop(), "display", "none");
 
 		this.form.transid.value = this.parentAssignment.transId;

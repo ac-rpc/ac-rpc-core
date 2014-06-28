@@ -68,12 +68,9 @@ function rpc_DateToYYYYMMDD(dateVal) {
  */
 function rpc_YYYYMMDDToDate(dateVal) {
 	if (dateVal.match(/^\d{8}$/)) {
-		var y = parseInt(dateVal.substr(0, 4));
-		var m = dateVal.substr(4, 2);
-		// Leading zeros have to go.
-		m = m.indexOf('0') === 0 ? parseInt(m.substr(1,1)) : parseInt(m);
-		var d = dateVal.substr(6, 2);
-		d = d.indexOf('0') === 0 ? parseInt(d.substr(1,1)) : parseInt(d);
+		var y = parseInt(dateVal.substr(0, 4), 10);
+		var m = parseInt(dateVal.substr(4, 2), 10);
+		var d = parseInt(dateVal.substr(6, 2), 10);
 		return new Date(y, m-1, d);
 	}
 	else return false;
