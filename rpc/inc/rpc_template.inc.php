@@ -194,7 +194,7 @@ QRY
 					$this->ancestral_template = $row['ancestral_template'];
 					// Templates always get advanced editing
 					$this->default_edit_mode = "ADVANCED";
-					$result->close();
+					$result->closeCursor();
 
 					$this->url = self::get_url($this->id, "", $this->config);
 					$this->url_edit = self::get_url($this->id, "edit", $this->config);

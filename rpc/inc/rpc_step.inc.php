@@ -186,7 +186,7 @@ QRY
 				{
 					$this->error = self::ERR_NO_SUCH_STEP;
 				}
-				$result->close();
+				$result->closeCursor();
 			}
 			else
 			{

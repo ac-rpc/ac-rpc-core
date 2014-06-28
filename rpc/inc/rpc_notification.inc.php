@@ -330,7 +330,7 @@ QRY
 			{
 				$arr_notifications[] = $row;
 			}
-			$result->close();
+			$result->closeCursor();
 			return $arr_notifications;
 		}
 		else

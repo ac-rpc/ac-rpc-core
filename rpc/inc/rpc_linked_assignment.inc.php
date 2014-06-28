@@ -155,7 +155,7 @@ class RPC_Linked_Assignment
 					$this->is_editable = TRUE;
 					$this->send_reminders = $row['remind'] == 1 ? TRUE : FALSE;
 					$assignid = $row['assignid'];
-					$result->close();
+					$result->closeCursor();
 					if (RPC_Assignment::exists($assignid, $this->db))
 					{
 						$this->assignment = new RPC_Assignment($assignid, $user, $config, $db);
@@ -203,7 +203,7 @@ class RPC_Linked_Assignment
 						$arr_step_annotations[$row['stepid']]['annotation'] = $row['annotation'];
 						$arr_step_annotations[$row['stepid']]['reminder_sent_date'] = $row['remindersentdate'];
 					}
-					$steps_result->close();
+					$steps_result->closeCursor();
 
 					// Bind the annotations and reminder sent dates to the assignment steps
 					foreach ($this->assignment->steps as $step)
@@ -249,7 +249,7 @@ class RPC_Linked_Assignment
 				$this->steps[$row['id']]->annotation = $row['annotation'];
 				$this->steps[$row['id']]->reminder_sent_date = $row['reminder_sent_date'];
 			}
-			$result->close();
+			$result->closeCursor();
 		}
 		return TRUE;
 	}
@@ -412,7 +412,7 @@ class RPC_Linked_Assignment
 		if ($result = $db->query($qry))
 		{
 			$rows = $result->num_rows;
-			$result->close();
+			$result->closeCursor();
 			return $rows > 0 ? TRUE : FALSE;
 		}
 		else return FALSE;

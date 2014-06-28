@@ -414,12 +414,12 @@ QRY
 				// Successful cookie validation, return username.
 				if ($result->num_rows == 1)
 				{
-					$result->close();
+					$result->closeCursor();
 					return $cookie['username'];
 				}
 				else
 				{
-					$result->close();
+					$result->closeCursor();
 					return FALSE;
 				}
 			}

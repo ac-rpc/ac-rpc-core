@@ -474,7 +474,7 @@ QRY
 				}
 				$arr_assignments[] = $row;
 			}
-			$result->close();
+			$result->closeCursor();
 			return $arr_assignments;
 		}
 		else
@@ -550,7 +550,7 @@ QRY
 				}
 				$arr_items_due[] = $row;
 			}
-			$result->close();
+			$result->closeCursor();
 			return $arr_items_due;
 		}
 		else
@@ -630,7 +630,7 @@ QRY;
 				$row['url_delete'] = $user->config->app_use_url_rewrite ? $row['url'] . "/delete" : $row['url'] . "&action=delete";
 				$arr_templates[] = $row;
 			}
-			$result->close();
+			$result->closeCursor();
 		}
 		else
 		{
@@ -851,12 +851,12 @@ QRY;
 			// User exists, return TRUE
 			if ($result->num_rows > 0)
 			{
-				$result->close();
+				$result->closeCursor();
 				return self::RPC_EXISTS;
 			}
 			else
 			{
-				$result->close();
+				$result->closeCursor();
 				return self::RPC_NOT_EXISTS;
 			}
 		}
@@ -881,12 +881,12 @@ QRY;
 			// User exists, return TRUE
 			if ($result->num_rows > 0)
 			{
-				$result->close();
+				$result->closeCursor();
 				return self::RPC_EXISTS;
 			}
 			else
 			{
-				$result->close();
+				$result->closeCursor();
 				return self::RPC_NOT_EXISTS;
 			}
 		}
@@ -924,7 +924,7 @@ QRY;
 			{
 				$arr_administrators[] = $row['username'];
 			}
-			$result->close();
+			$result->closeCursor();
 			return $arr_administrators;
 		}
 		else
@@ -951,7 +951,7 @@ QRY;
 			{
 				$arr_publishers[] = $row['username'];
 			}
-			$result->close();
+			$result->closeCursor();
 			return $arr_publishers;
 		}
 		else
@@ -995,7 +995,7 @@ QRY;
 				$arr_privileged_users[$uname]['is_administrator'] = $row['is_administrator'] == 1 ? TRUE : FALSE;
 				$arr_privileged_users[$uname]['is_superuser'] = in_array($row['username'], $config->auth_superusers) ? TRUE : FALSE;
 			}
-			$result->close();
+			$result->closeCursor();
 			return $arr_privileged_users;
 		}
 		else

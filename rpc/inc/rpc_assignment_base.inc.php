@@ -225,7 +225,7 @@ abstract class RPC_Assignment_Base
 			{
 				$this->steps[$row['stepid']] = new RPC_Step($row['stepid'], $user, $this->config, $this->db);
 			}
-			$result->close();
+			$result->closeCursor();
 			return TRUE;
 		}
 		else
@@ -278,7 +278,7 @@ abstract class RPC_Assignment_Base
 			{
 				$arr_raw_steps[] = $row;
 			}
-			$result->close();
+			$result->closeCursor();
 
 			// Since the query result is already ordered, iterate over and
 			// update all the positions starting with 1
@@ -506,12 +506,12 @@ abstract class RPC_Assignment_Base
 		{
 			if ($result->num_rows < 1)
 			{
-				$result->close();
+				$result->closeCursor();
 				return FALSE;
 			}
 			else
 			{
-				$result->close();
+				$result->closeCursor();
 				return TRUE;
 			}
 		}

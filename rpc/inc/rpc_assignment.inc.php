@@ -258,7 +258,7 @@ QRY
 
 						// Direct descendants of templates get basic mode for students.
 						$this->default_edit_mode = $user->type == "STUDENT" && $this->parent_type == "template" ? "BASIC" : "ADVANCED";
-						$result->close();
+						$result->closeCursor();
 
 						$this->url = self::get_url($this->id, "", $this->config);
 						$this->url_edit = self::get_url($this->id, "edit", $this->config);

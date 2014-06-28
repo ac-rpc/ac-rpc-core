@@ -115,7 +115,7 @@ abstract class RPC
 		self::$_required_authlevel = NULL;
 		self::$_active_user = NULL;
 		self::$_config = NULL;
-		self::$_db->close();
+		self::$_db = NULL;
 		return;
 	}
 
