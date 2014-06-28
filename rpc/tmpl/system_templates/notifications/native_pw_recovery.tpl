@@ -11,6 +11,6 @@ recovery. Click the link below to set a new password.
 This link is valid for one use only, and will expire after 24 hours 
 or your next successful login.
 
-{$application.fixed_web_path}account?=resetpw&token={$token}
+{$application.fixed_web_path}account?acct?=resetpw&token={$token}
 
 * Please do not reply to this message *
