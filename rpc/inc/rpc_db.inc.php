@@ -65,6 +65,8 @@ class RPC_DB
 			try
 			{
 				self::$_connection = new \PDO("mysql:host={$config->db_host};dbname={$config->db_name};port={$config->db_port}", $config->db_user, $config->db_pass);
+				self::$_connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+				self::$_connection->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC)
 			}
 			catch (\PDOException $e)
 			{
