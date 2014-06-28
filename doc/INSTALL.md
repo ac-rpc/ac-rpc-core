@@ -85,7 +85,7 @@ Research Project Calculator configuration is stored in `inc/config.inc.php`.
 
  - Rename `inc/example_config.inc.php` to 'inc/config.inc.php`
  - Edit config.inc.php.  The `DB_*` directives are most important, almost all will require some attention and changes.  Documentation on each directive is available in the example config file.
- - Make sure you've identified a username/email address in `AUTH_SUPERUSE`!
+ - Make sure you've identified a username/email address in `AUTH_SUPERUSER`!
 
 ### Get Started
  - Login as the address specified in `AUTH_SUPERUSER`
