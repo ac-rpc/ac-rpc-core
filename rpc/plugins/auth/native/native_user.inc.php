@@ -201,15 +201,19 @@ class Native_User extends RPC_User
 			$qry = sprintf("SELECT 1 FROM users WHERE username = '%s' AND password = '%s';",
 				$this->db->real_escape_string($this->username),
 				$this->db->real_escape_string(sha1($password . $this->salt))
-		  );
+		    );
 			if ($result = $this->db->query($qry))
 			{
 				if ($result->num_rows === 1)
 				{
 					// Legacy users need to be rehashed into bcrypt
-					if ($this->_set_password($password)) $this->db->commit();
+					$this->db->beginTransaction();
+					if ($this->_set_password($password)) {
+						$this->db->commit();
+						$this->set_authenticated();
+					}
+					else $this->db->rollBack();
 
-					$this->set_authenticated();
 				}
 				// Bad password
 				else
@@ -292,12 +296,18 @@ class Native_User extends RPC_User
 		$session = $this->db->real_escape_string(md5(time() . rand()));
 		$token = $this->db->real_escape_string(md5(time() . rand()));
 		$qry = sprintf("INSERT INTO native_sessions (userid, session, token) VALUES (%u, '%s', '%s');", $this->id, $session, $token);
+
+		$this->db->beginTransaction();
 		if ($result = $this->db->query($qry))
 		{
 			$this->db->commit();
 			$this->session = $session;
 			$this->token = $token;
 			$this->set_cookie();
+		}
+		else
+		{
+			$this->db->rollBack();
 		}
 	}
 	/**
@@ -309,11 +319,16 @@ class Native_User extends RPC_User
 	public function destroy_session()
 	{
 		$qry = sprintf("DELETE FROM native_sessions WHERE userid = %u AND session = '%s';", $this->id, $this->db->real_escape_string($this->session));
+		$this->db->beginTransaction();
 		if ($result = $this->db->query($qry))
 		{
 			$this->db->commit();
 			$this->session = "";
 			$this->token = "";
+		}
+		else
+		{
+			$this->db->rollBack();
 		}
 		return;
 	}
@@ -329,10 +344,15 @@ class Native_User extends RPC_User
 	{
 		$token = md5(time() . rand());
 		$qry = sprintf("UPDATE native_sessions SET token = '%s' WHERE userid = %u AND session = '%s';", $this->db->real_escape_string($token), $this->id, $this->db->real_escape_string($this->session));
+		$this->db->beginTransaction();
 		if ($result = $this->db->query($qry))
 		{
 			$this->db->commit();
 			$this->token = $token;
+		}
+		else
+		{
+			$this->db->rollBack();
 		}
 		return;
 	}
@@ -476,7 +496,9 @@ QRY
 
 		// Updated hashes as bcrypt stores the salt with the hash, so the salt column is legacy
 		$hashinfo = password_get_info($newpassword_hash);
+
 		$qry = sprintf("UPDATE users SET password = '%s', passwordsalt = 'BCRYPT-UNUSED', hashtype = '%s'  WHERE userid = %u;", $newpassword_hash, $hashinfo['algoName'], $this->id);
+		$this->db->beginTransaction();
 		if ($result = $this->db->query($qry))
 		{
 			$this->db->commit();
@@ -487,6 +509,7 @@ QRY
 		}
 		else
 		{
+			$this->db->rollBack();
 			$this->error = self::ERR_DB_ERROR;
 			return FALSE;
 		}
@@ -500,12 +523,17 @@ QRY
 	private function _update_last_login()
 	{
 		// Update the login timestamp
+		$this->db->beginTransaction();
 		if ($this->db->query(sprintf("UPDATE users SET last_login = NOW() WHERE username = '%s';", $this->db->real_escape_string($this->username))))
 		{
 			$this->db->commit();
 			return TRUE;
 		}
-		return FALSE;
+		else
+		{
+			$this->db->rollBack();
+			return FALSE;
+		}
 	}
 	/**
 	 * Set a new random password for the user and send
@@ -610,13 +638,19 @@ HEADERS;
 		$this->reset_token_expires = time() + 86400;
 
 		// Store the new token
-    $qry = sprintf("UPDATE users SET reset_token = '%s', reset_token_expires = NOW() + INTERVAL 1 DAY WHERE userid = %u", $this->reset_token, $this->id);
-    if ($this->db->query($qry))
-    {
+
+		$this->db->beginTransaction();
+		$qry = sprintf("UPDATE users SET reset_token = '%s', reset_token_expires = NOW() + INTERVAL 1 DAY WHERE userid = %u", $this->reset_token, $this->id);
+		if ($this->db->query($qry))
+		{
 			$this->db->commit();
 			return $this->reset_token;
-    }
-    return FALSE;
+		}
+		else
+		{
+			$this->db->rollBack();
+			return FALSE;
+		}
 	}
   /**
    * Clear the reset token
@@ -626,12 +660,17 @@ HEADERS;
    */
   public function clear_reset_token()
   {
-    if ($this->db->query(sprintf("UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE userid = %u", $this->id)))
-    {
+	$this->db->beginTransaction();
+	if ($this->db->query(sprintf("UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE userid = %u", $this->id)))
+	{
 		$this->db->commit();
 		return TRUE;
-    }
-    return FALSE;
+	}
+	else
+	{
+		$this->db->rollBack();
+		return FALSE;
+	}
   }
   /**
    * Retrieve a Native_User object by reset token
