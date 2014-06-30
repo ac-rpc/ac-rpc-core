@@ -304,11 +304,11 @@ class RPC_Notification
 	{
 		// Using $config->app_notification_advance_days as cutoff for notifications
 		// Any that have not been sent yet will be selected in this batch (reminder_sent_date IS NULL)
-		$qry = sprintf(<<<QRY
+		$qry = <<<QRY
 			SELECT NULL as linkid, steps_vw.userid, steps_vw.assignid, steps_vw.id AS stepid
 			FROM steps_vw JOIN assignments ON steps_vw.assignid = assignments.assignid
 			WHERE remind = 1
-				AND steps_vw.due_date <= (UNIX_TIMESTAMP(CURDATE()) + (86400 * %1\$u))
+				AND steps_vw.due_date <= (UNIX_TIMESTAMP(CURDATE()) + (86400 * :days))
 				AND (reminder_sent_date IS NULL OR reminder_sent_date = 0)
 				AND assignments.template = 0
 			UNION
@@ -317,20 +317,22 @@ class RPC_Notification
 				linked_steps JOIN linked_assignments ON linked_steps.linkid = linked_assignments.linkid
 				JOIN steps_vw ON linked_steps.stepid = steps_vw.id
 			WHERE linked_assignments.remind = 1
-				AND steps_vw.due_date <= UNIX_TIMESTAMP(CURDATE()) + (86400 * %1\$u)
+				AND steps_vw.due_date <= UNIX_TIMESTAMP(CURDATE()) + (86400 * :days_union)
 				AND (linked_steps.remindersentdate IS NULL OR linked_steps.remindersentdate = 0);
-QRY
-			, $config->app_notification_advance_days);
+QRY;
+		$stmt = $db->prepare($qry);
+		$stmt->bindParam(':days', $config->app_notification_advance_days, \PDO::PARAM_INT);
+		$stmt->bindParam(':days_union', $config->app_notification_advance_days, \PDO::PARAM_INT);
 
-		if ($result = $db->query($qry))
+		if ($stmt->execute())
 		{
 			$arr_notifications = array();
-			$rows = $result->fetchAll();
+			$rows = $stmt->fetchAll();
 			foreach ($rows as $row)
 			{
 				$arr_notifications[] = $row;
 			}
-			$result->closeCursor();
+			$stmt->closeCursor();
 			return $arr_notifications;
 		}
 		else
