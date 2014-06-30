@@ -196,6 +196,22 @@ QRY;
 		// If not retrieving a DB step, we don't need to do anything else
 		return;
 	}
+	/**
+	 * PDO cannot be serialized and must thus be filtered
+	 * from the serialized properties when this object is stored to $_SESSION
+	 * 
+	 * @access public
+	 * @return array
+	 */
+	public function __sleep()
+	{
+		$ref = new \ReflectionClass($this);
+		$props = $ref->getProperties();
+		$props = array_filter(array_map(function($a) {
+			return ($a->name != "config" && $a->name != "db") ? $a->name : null;
+		}, $props));
+		return $props;
+	}
 
 	/**
 	 * Permanently delete step

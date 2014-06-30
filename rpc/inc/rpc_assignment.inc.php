@@ -265,6 +265,22 @@ QRY;
 		// If no ID, so empty object returned
 		return;
 	}
+	/**
+	 * PDO cannot be serialized and must thus be filtered
+	 * from the serialized properties when this object is stored to $_SESSION
+	 * 
+	 * @access public
+	 * @return array
+	 */
+	public function __sleep()
+	{
+		$ref = new \ReflectionClass($this);
+		$props = $ref->getProperties();
+		$props = array_filter(array_map(function($a) {
+			return ($a->name != "config" && $a->name != "db") ? $a->name : null;
+		}, $props));
+		return $props;
+	}
 
 	/**
 	 * Sanitize properties in preparation for database insert/update
@@ -599,21 +615,14 @@ QRY;
 	}
 	/**
 	 * Store this object in $_SESSION (useful for guest assignment creation)
+	 * Magic __sleep() filters the PDO & RPC_Config from $_SESSION
 	 *
 	 * @access public
 	 * @return boolean
 	 */
 	public function store_to_session()
 	{
-		$o = clone $this;
-		$o->config = NULL;
-		$o->db = NULL;
-		foreach ($o->steps as $step)
-		{
-			$step->config = NULL;
-			$step->db = NULL;
-		}
-		$_SESSION['active_assignment_object'] = $o;
+		$_SESSION['active_assignment_object'] = clone $this;
 		return TRUE;
 	}
 
@@ -633,7 +642,7 @@ QRY;
 			return FALSE;
 		}
 
-		$assignment = $_SESSION['active_assignment_object'];
+		$assignment = clone $_SESSION['active_assignment_object'];
 		$assignment->is_temporary = TRUE;
 		$assignment->config = $config;
 		$assignment->db = $db;

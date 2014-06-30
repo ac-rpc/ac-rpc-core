@@ -132,12 +132,14 @@ if
 	if (!empty($new_object->error))
 	{
 		$_SESSION['general_error'] = $new_object->get_error();
+		RPC::cleanup();
 		header("Location: " . $config->app_fixed_web_path);
 		exit();
 	}
 	else
 	{
 		unset($_SESSION['transid']);
+		RPC::cleanup();
 		header("Location: " . $new_object->url);
 		exit();
 	}
