@@ -324,10 +324,14 @@ QRY;
 				$this->error = self::ERR_NO_SUCH_ASSIGNMENT;
 				return FALSE;
 			}
-
 			// Input is valid, so proceed...
 
-			$this->db->beginTransAction();
+			$in_local_trans = FALSE;
+			if (!$this->db->inTransaction())
+			{
+				$this->db->beginTransAction();
+				$in_local_trans = TRUE;
+			}
 
 			$stmt = $this->db->prepare(self::INSERT_QUERY);
 			$stmt->bindValue(':assignid', $assignid, \PDO::PARAM_INT);
@@ -342,12 +346,18 @@ QRY;
 			if ($stmt->execute())
 			{
 				$new_step_id = $this->db->lastInsertId();
-				$this->db->commit();
+				if ($in_local_trans)
+				{
+					$this->db->commit();
+				}
 				return new self($new_step_id, $user, $this->config, $this->db);
 			}
 			else
 			{
-				$this->db->rollBack();
+				if ($in_local_trans)
+				{
+					$this->db->rollBack();
+				}
 				$this->error = self::ERR_DB_ERROR;
 				return FALSE;
 			}

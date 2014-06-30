@@ -795,14 +795,13 @@ QRY;
 				$new_assign->url_copy = $config->app_relative_web_path . "?action=copy";
 			}
 
+			$db->beginTransaction();
 			if ($user)
 			{
-				$db->beginTransaction();
 				$new_assign->_store($user);
 				if (empty($new_assign->error))
 				{
 					$stored = TRUE;
-					$db->commit();
 					$new_assign = new self($new_assign->id, $user, $config, $db);
 				}
 				else
@@ -818,7 +817,6 @@ QRY;
 				$new_assign->steps[] = $step->duplicate($new_assign->id, $user, NULL);
 			}
 			// Set parent and ancestor
-			$db->beginTransaction();
 			$new_assign->parent = $template->id;
 			$new_assign->ancestral_template = $template->id;
 			// Then calculate and map in the due dates and log template usage
