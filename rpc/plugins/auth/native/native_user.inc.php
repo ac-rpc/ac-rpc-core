@@ -666,8 +666,9 @@ HEADERS;
 		// Store the new token
 
 		$this->db->beginTransaction();
-		$qry = sprintf("UPDATE users SET reset_token = '%s', reset_token_expires = NOW() + INTERVAL 1 DAY WHERE userid = %u", $this->reset_token, $this->id);
-		if ($this->db->query($qry))
+		$qry = "UPDATE users SET reset_token = :reset_token, reset_token_expires = NOW() + INTERVAL 1 DAY WHERE userid = :userid";
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':reset_token' => $this->reset_token, ':userid' => $this->id)))
 		{
 			$this->db->commit();
 			return $this->reset_token;
@@ -687,7 +688,9 @@ HEADERS;
   public function clear_reset_token()
   {
 	$this->db->beginTransaction();
-	if ($this->db->query(sprintf("UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE userid = %u", $this->id)))
+	$qry = "UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE userid = :userid";
+	$stmt = $this->db->prepare($qry);
+	if ($stmt->execute(array(':userid' => $this->id)))
 	{
 		$this->db->commit();
 		return TRUE;
