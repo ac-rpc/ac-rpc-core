@@ -141,7 +141,7 @@ abstract class RPC_Step_Base
 	/**
 	 * Global database connection singleton
 	 *
-	 * @var object MySQLi database connection singleton
+	 * @var \PDO database connection singleton
 	 * @access public
 	 */
 	public $db;

@@ -104,7 +104,7 @@ class RPC_Step extends RPC_Step_Base
 	 * @param integer $id Unique ID of step to retrieve.  If NULL, an empty object will be returned
 	 * @param object $user RPC_User attempting to access this step
 	 * @param object $config RPC_Config configuration singleton
-	 * @param object $db MySQLi database connection singleton
+	 * @param \PDO $db PDO database connection singleton
 	 * @access public
 	 * @return object RPC_Step
 	 */
@@ -477,7 +477,7 @@ QRY;
 	 * @param int $due_date Unix timestamp Due date/Reminder date for step
 	 * @param int $percent Percentage of time spent on this step (if parent is a template)
 	 * @param object $config RPC_Config configuration singleton
-	 * @param object $db MySQLi database connection singleton
+	 * @param \PDO $db PDO database connection singleton
 	 * @static
 	 * @access public
 	 * @return object RPC_Step or FALSE on failure

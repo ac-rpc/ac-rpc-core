@@ -135,7 +135,7 @@ class RPC_Assignment extends RPC_Assignment_Base
 	 * @param integer $id Unique ID of assignment to retrieve, or NULL
 	 * @param object $user RPC_User attempting to access this assignment
 	 * @param object $config RPC_Config configuration singleton
-	 * @param object $db MySQLi database connection singleton
+	 * @param \PDO $db PDO database connection singleton
 	 * @access public
 	 * @return object RPC_Assignment
 	 */
@@ -621,7 +621,7 @@ QRY;
 	 * Retrieve RPC_Assignment from $_SESSION and return as a complete object
 	 *
 	 * @param object $config RPC_Config configuration singleton
-	 * @param object $db MySQLi database connection singleton
+	 * @param \PDO $db PDO database connection singleton
 	 * @static
 	 * @access public
 	 * @return RPC_Assignment
@@ -697,7 +697,7 @@ QRY;
 	 * @param integer $due_date Unix timestamp. Due date for this assignment.
 	 * @param boolean $create_default_step Should one default RPC_Step be attached to this assignment?
 	 * @param object $config RPC_Config configuration singleton
-	 * @param object $db MySQLi database connection singleton
+	 * @param \PDO $db PDO database connection singleton
 	 * @static
 	 * @access public
 	 * @return object RPC_Assignment
@@ -763,7 +763,7 @@ QRY;
 	 * @param integer $start_date Unix timestamp. Start date for this assignment.
 	 * @param integer $due_date Unix timestamp. Due date for this assignment.
 	 * @param object $config RPC_Config configuration singleton
-	 * @param object $db MySQLi database connection singleton
+	 * @param \PDO $db PDO database connection singleton
 	 * @static
 	 * @access public
 	 * @return object RPC_Assignment
@@ -852,7 +852,7 @@ QRY;
 	 * @param RPC_Assignment Assignment to clone
 	 * @param object $user RPC_User User to create this assignment for, or do not store in database if null
 	 * @param object $config RPC_Config configuration singleton
-	 * @param object $db MySQLi database connection singleton
+	 * @param \PDO $db PDO database connection singleton
 	 * @static
 	 * @access public
 	 * @return object RPC_Assignment

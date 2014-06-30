@@ -104,9 +104,9 @@ class RPC_Linked_Assignment
 	 */
 	public $error = NULL;
 	/**
-	 * MySQLi database connection singleton
+	 * PDO database connection singleton
 	 *
-	 * @var object MySQLi database connection
+	 * @var \PDO database connection
 	 * @access public
 	 */
 	public $db;
@@ -124,7 +124,7 @@ class RPC_Linked_Assignment
 	 * @param integer $id Unique id of link
 	 * @param object $user RPC_User
 	 * @param object $config RPC_Config global configuration singleton
-	 * @param mixed $db MySQLi global database singleton
+	 * @param \PDO $db database singleton
 	 * @access public
 	 * @return RPC_Linked_Assignment
 	 */
@@ -373,7 +373,7 @@ class RPC_Linked_Assignment
 	 * 
 	 * @param object $assignment RPC_Assignment
 	 * @param object $user RPC_User
-	 * @param object $db MySQLi global database connection
+	 * @param \PDO $db PDO global database connection
 	 * @static
 	 * @access public
 	 * @return boolean
@@ -414,7 +414,7 @@ class RPC_Linked_Assignment
 	 * 
 	 * @param integer $assignid 
 	 * @param integer $user 
-	 * @param object $db MySQLi global database connection
+	 * @param \PDO $db PDO global database connection
 	 * @static
 	 * @access public
 	 * @return boolean

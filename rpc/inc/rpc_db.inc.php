@@ -32,7 +32,7 @@ class RPC_DB
 	 * Connection singleton member
 	 * 
 	 * @param object $config RPC_Config configuration singleton
-	 * @var object PDO database connection
+	 * @var \PDO database connection singleton
 	 * @static
 	 * @access private
 	 */
@@ -48,7 +48,7 @@ class RPC_DB
 	 * @param object $config RPC_Config configuration singleton
 	 * @static
 	 * @access public
-	 * @return object PDO database connection
+	 * @return \PDO database connection singleton
 	 */
 	public static function get_connection($config)
 	{

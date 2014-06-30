@@ -295,7 +295,7 @@ class RPC_Notification
 	 * pending notification for both regular and linked assignments
 	 *
 	 * @param RPC_Config $config Global configuration singleton
-	 * @param RPC_DB $db Global MySQLi database connection singleton
+	 * @param \PDO $db PDO database connection singleton
 	 * @static
 	 * @access public
 	 * @return array Associative array userid,assignid,stepid

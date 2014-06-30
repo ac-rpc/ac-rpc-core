@@ -185,7 +185,7 @@ class RPC_User
 	 * @param integer $query_type RPC_QUERY_USER_BY_ID | RPC_QUERY_USER_BY_USERNAME
 	 * @param string $query User to retrieve by username or ID
 	 * @param object $config RPC_Config configuration singleton
-	 * @param object $db RPC_DB MySQLi database connection singleton
+	 * @param \PDO $db database connection singleton
 	 * @access public
 	 * @return RPC_User
 	 */
@@ -819,7 +819,7 @@ QRY;
 	 * @param string $name 
 	 * @param string $email 
 	 * @param integer $perms Integer representation of permissions
-	 * @param object $db MySQLi database connection
+	 * @param \PDO $db PDO database connection
 	 * @static
 	 * @access public
 	 * @return integer Userid of newly created user, or FALSE on failure
@@ -862,7 +862,7 @@ QRY;
 	 * username exists
 	 * 
 	 * @param string $username 
-	 * @param object $db MySQLi database connection
+	 * @param \PDO $db PDO database connection
 	 * @static
 	 * @access public
 	 * @return boolean
@@ -892,7 +892,7 @@ QRY;
 	 * Return TRUE if it exists
 	 * 
 	 * @param string $email
-	 * @param object $db MySQLi database connection
+	 * @param \PDO $db PDO database connection
 	 * @static
 	 * @access public
 	 * @return boolean
@@ -933,7 +933,7 @@ QRY;
 	/**
 	 * Return an array of all administrator usernames 
 	 * 
-	 * @param object $db MySQLi database connection singleton
+	 * @param \PDO $db PDO database connection singleton
 	 * @static
 	 * @access public
 	 * @return array
@@ -960,7 +960,7 @@ QRY;
 	/**
 	 * Return an array of all publisher usernames 
 	 * 
-	 * @param object $db MySQLi database connection singleton
+	 * @param \PDO $db PDO database connection singleton
 	 * @static
 	 * @access public
 	 * @return array
@@ -990,7 +990,7 @@ QRY;
 	 * name, publisher, administrator and superuser status
 	 * 
 	 * @param object $config RPC_Config global configuration singleton
-	 * @param object $db MySQLi database connection singleton
+	 * @param \PDO $db PDO database connection singleton
 	 * @static
 	 * @access public
 	 * @return array

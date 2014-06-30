@@ -193,9 +193,9 @@ abstract class RPC_Assignment_Base
 	 */
 	public $url_delete;
 	/**
-	 * MySQLi database connection singleton
+	 * PDO database connection singleton
 	 *
-	 * @var object MySQLi database connection
+	 * @var \PDO 
 	 * @access public
 	 */
 	public $db;
@@ -498,7 +498,7 @@ abstract class RPC_Assignment_Base
 	 * Does assignment/template $id exist?
 	 *
 	 * @param int $id Assignment unique id to test
-	 * @param object $db MySQLi database connection singleton
+	 * @param \PDO $db database connection singleton
 	 * @static
 	 * @access public
 	 * @return boolean
@@ -513,12 +513,12 @@ abstract class RPC_Assignment_Base
 			if ($stmt->fetch())
 			{
 				$stmt->closeCursor();
-				return FALSE;
+				return TRUE;
 			}
 			else
 			{
 				$stmt->closeCursor();
-				return TRUE;
+				return FALSE;
 			}
 		}
 		else return FALSE;

@@ -56,10 +56,10 @@ abstract class RPC
 	 */
 	private static $_config = NULL;
 	/**
-	 * MySQLi database connection singleton
+	 * PDO database connection singleton
 	 *
 	 * @static
-	 * @var object MySQLi database connection
+	 * @var \PDO database connection singleton
 	 * @access private
 	 */
 	private static $_db = NULL;
@@ -71,7 +71,7 @@ abstract class RPC
 	 *
 	 * @param integer $authlevel Target authentication level for this script
 	 * @param object $config RPC_Config global configuration singleton
-	 * @param object $db MySQLi global database connection singleton
+	 * @param \PDO $db global database connection singleton
 	 * @static
 	 * @access public
 	 * @return void

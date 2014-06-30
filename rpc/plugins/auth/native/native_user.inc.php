@@ -94,7 +94,7 @@ class Native_User extends RPC_User
 	 *
 	 * @param string $username User to retrieve
 	 * @param object $config RPC_Config configuration singleton
-	 * @param object $db RPC_DB MySQLi database connection singleton
+	 * @param \PDO $db database connection singleton
 	 * @access public
 	 * @return RPC_User
 	 */
@@ -395,7 +395,7 @@ class Native_User extends RPC_User
 	/**
 	 * Validate the RPCAUTH native authentication cookie
 	 *
-	 * @param object $db MySQLi database connection singleton
+	 * @param \PDO $db PDO database connection singleton
 	 * @static
 	 * @access public
 	 * @return string Username of validated user
@@ -706,7 +706,7 @@ HEADERS;
    *
    * @param string $token
    * @param RPC_Config $config
-   * @param MySQLi $db
+   * @param \PDO $db
    * @static
    * @access public
    * @return Native_User

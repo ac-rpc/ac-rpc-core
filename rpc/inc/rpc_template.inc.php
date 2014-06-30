@@ -92,7 +92,7 @@ class RPC_Template extends RPC_Assignment_Base
 	 * @param integer $id Unique ID of template to retrieve, or NULL
 	 * @param object $user RPC_User attempting to access this template
 	 * @param object $config RPC_Config configuration singleton
-	 * @param object $db MySQLi database connection singleton
+	 * @param \PDO $db PDO database connection singleton
 	 * @access public
 	 * @return object RPC_Template
 	 */
@@ -357,7 +357,7 @@ QRY;
 	 * @param string $class Template class
 	 * @param boolean $create_default_step Should one default RPC_Step be attached to this template?
 	 * @param object $config RPC_Config configuration singleton
-	 * @param object $db MySQLi database connection singleton
+	 * @param \PDO $db PDO database connection singleton
 	 * @static
 	 * @access public
 	 * @return object RPC_Template
@@ -416,7 +416,7 @@ QRY;
 	 * @param string $title
 	 * @param string $class
 	 * @param object $config RPC_Config configuration singleton
-	 * @param object $db MySQLi database connection singleton
+	 * @param \PDO $db PDO database connection singleton
 	 * @static
 	 * @access public
 	 * @return object RPC_Assignment

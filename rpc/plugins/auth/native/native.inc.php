@@ -37,7 +37,7 @@
  *						and the user created if they are found. If not found, the user will not be
  *						created.
  * @param object $config Global RPC_Config configuration singleton (optional)
- * @param object $db MySQLi database connection singleton (optional)
+ * @param \PDO $db database connection singleton (optional)
  * @access public
  * @return object Native_User valid RPC user
  */

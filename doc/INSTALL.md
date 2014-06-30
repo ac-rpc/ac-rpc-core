@@ -15,7 +15,7 @@ Please [|join the RPC-development mailing list](http://lists.minitex.umn.edu/mai
 #### PHP Requirements & Dependencies
  - PHP 5.1.2 or later
  - PHP PECL::Package::json needed for PHP < 5.3.0 (`json_encode()` and `json_decode()` are native to PHP 5.3) http://pecl.php.net/package/json
- - PHP MySQLi extension (usually distributed as part of PHP)
+ - PHP PDO extension with MySQL driver (usually distributed as part of PHP)
  - PHP Smarty 3 templating engine http://www.smarty.net/
 
 ### Installation

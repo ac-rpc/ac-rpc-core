@@ -20,7 +20,7 @@ including redirects, form display if necessary, network communication, etc.
  *    is not enforced. This us useful for pages allowing
  *    guest access
  * @param object $config Global RPC_Config configuration singleton
- * @param object $config Global MySQLi database connection singleton
+ * @param \PDO $db database connection singleton
  * @return string Pipe-delimited string in the format:
  *                (OK/FAIL)|username|email|permissions|fail-reason
  *
