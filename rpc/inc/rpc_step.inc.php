@@ -84,20 +84,20 @@ class RPC_Step extends RPC_Step_Base
 				position,
 				reminderdate,
 				percent
-			) VALUES (%u, '%s', '%s', '%s', '%s', %u, FROM_UNIXTIME(%u), %u);";
+			) VALUES (:assignid, :title, :description, :teacher_description, :annotation, :position, FROM_UNIXTIME(:due_date), :percent);";
 	/**
 	 * Query skeleton for database UPDATE
 	 */
 	const UPDATE_QUERY =
 		"UPDATE steps SET
-			title = '%s',
-			description = '%s',
-			teacher_description = '%s',
-			annotation = '%s',
-			reminderdate = FROM_UNIXTIME(%u),
-			remindersentdate = FROM_UNIXTIME(%u),
-			percent = %u
-		WHERE stepid = %u;";
+			title = :title,
+			description = :description,
+			teacher_description = :teacher_description,
+			annotation = :annotation,
+			reminderdate = FROM_UNIXTIME(:due_date),
+			remindersentdate = FROM_UNIXTIME(:reminder_sent_date),
+			percent = :percent
+		WHERE stepid = :stepid";
 	/**
 	 * Constructor returns step having stepid $id or an empty instance (with $db and $config) if $id===NULL
 	 *
@@ -121,7 +121,7 @@ class RPC_Step extends RPC_Step_Base
 				return;
 			}
 
-			$qry = sprintf(<<<QRY
+			$qry = <<<QRY
 			SELECT
 				id,
 				assignid,
@@ -138,13 +138,13 @@ class RPC_Step extends RPC_Step_Base
 				percent,
 				template_step
 			FROM steps_vw
-			WHERE id = %u;
-QRY
-			, $id);
+			WHERE id = :stepid;
+QRY;
 
-			if ($result = $this->db->query($qry))
+			$stmt = $this->db->prepare($qry);
+			if ($stmt->execute(array(':stepid' => $id)))
 			{
-				if ($row = $result->fetch())
+				if ($row = $stmt->fetch())
 				{
 					// First get author and sharing information
 					$this->id = intval($row['id']);
@@ -186,7 +186,7 @@ QRY
 				{
 					$this->error = self::ERR_NO_SUCH_STEP;
 				}
-				$result->closeCursor();
+				$stmt->closeCursor();
 			}
 			else
 			{
@@ -211,8 +211,9 @@ QRY
 			$this->error = self::ERR_ACCESS_DENIED;
 			return FALSE;
 		}
-		$qry = sprintf("DELETE FROM steps WHERE stepid=%u;", $this->id);
-		if ($result = $this->db->query($qry))
+		$qry = "DELETE FROM steps WHERE stepid = :stepid";
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(':stepid' => $this->id))
 		{
 			return TRUE;
 		}
@@ -230,8 +231,9 @@ QRY
 	 */
 	public function set_notify_date()
 	{
-		$qry = sprintf("UPDATE steps SET remindersentdate = FROM_UNIXTIME(%u) WHERE stepid = %u;", time(), $this->id);
-		if ($this->db->query($qry))
+		$qry = "UPDATE steps SET remindersentdate = FROM_UNIXTIME(:unixtime) WHERE stepid = :stepid";
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':unixtime' => time(), ':stepid' => $this->id)))
 		{
 			$this->reminder_sent_date = time();
 			return TRUE;
@@ -255,8 +257,9 @@ QRY
 		{
 			$this->error = self::ERR_INVALID_INPUT;
 		}
-		$qry = sprintf("UPDATE linked_steps SET remindersentdate = FROM_UNIXTIME(%u) WHERE stepid = %u AND linkid = %u;", time(), $this->id, $linkid);
-		if ($this->db->query($qry))
+		$qry = "UPDATE linked_steps SET remindersentdate = FROM_UNIXTIME(:unixtime) WHERE stepid = :stepid AND linkid = :linkid";
+		$stmt= $this->db->prepare($qry);
+		if ($stmt->execute(array(':unixtime' => time(), ':stepid' => $this->id, ':linkid' => $linkid)))
 		{
 			return TRUE;
 		}
@@ -275,9 +278,13 @@ QRY
 	 */
 	public function clear_notify_date()
 	{
-		$qry = sprintf("UPDATE steps SET remindersentdate = NULL WHERE stepid = %u;", $this->id);
-		$qry_linked = sprintf("UPDATE linked_steps SET remindersentdate = NULL WHERE stepid = %u;", $this->id);
-		if ($this->db->query($qry) && $this->db->query($qry_linked))
+		$stmt = $this->db->prepare("UPDATE steps SET remindersentdate = NULL WHERE stepid = :stepid");
+		$stmt->bindVale(':stepid', $this->id, \PDO::PARAM_INT);
+
+		$stmt_linked = "UPDATE steps SET remindersentdate = NULL WHERE stepid = :stepid";
+		$stmt_linked->bindValue(':stepid', $this->id, \PDO::PARAM_INT);
+
+		if ($stmt->execute() && $stmt_linked->execute())
 		{
 			$this->reminder_sent_date = NULL;
 			return TRUE;
@@ -320,22 +327,21 @@ QRY
 
 			// Input is valid, so proceed...
 
-
-			$qry = sprintf(self::INSERT_QUERY,
-				$assignid,
-				$this->db->real_escape_string($this->title),
-				$this->db->real_escape_string($this->description),
-				$this->db->real_escape_string($this->teacher_description),
-				$this->db->real_escape_string($this->annotation),
-				$this->position,
-				$due_date === NULL ? $this->due_date : $due_date,
-				$this->percent
-			);
-			// Success, return the new step
 			$this->db->beginTransAction();
-			if ($result = $this->db->query($qry))
+
+			$stmt = $this->db->prepare(self::INSERT_QUERY);
+			$stmt->bindValue(':assignid', $assignid, \PDO::PARAM_INT);
+			$stmt->bindValue(':title', $this->title, \PDO::PARAM_STR);
+			$stmt->bindValue(':description', $this->description, \PDO::PARAM_STR);
+			$stmt->bindValue(':teacher_description', $this->teacher_description, \PDO::PARAM_STR);
+			$stmt->bindValue(':annotation', $this->annotation, \PDO::PARAM_STR);
+			$stmt->bindValue(':position', $this->position, \PDO::PARAM_INT);
+			$stmt->bindValue(':due_date', ($due_date === NULL ? $this->due_date : $due_date), \PDO::PARAM_STR);
+			$stmt->bindValue(':percent', $this->percent, \PDO::PARAM_INT);
+
+			if ($stmt->execute())
 			{
-				$new_step_id = $this->db->insert_id;
+				$new_step_id = $this->db->lastInsertId();
 				$this->db->commit();
 				return new self($new_step_id, $user, $this->config, $this->db);
 			}
@@ -396,19 +402,17 @@ QRY
 			$this->error = self::ERR_DATA_UNSANITIZED;
 			return FALSE;
 		}
-		$qry = sprintf(self::UPDATE_QUERY,
-			// real_escape_string() and trim() already have been called by parent::sanitize()
-			$this->title,
-			$this->description,
-			$this->teacher_description,
-			$this->annotation,
-			$this->due_date,
-			$this->reminder_sent_date,
-			$this->percent,
-			$this->id
-		);
+		$stmt = $this->db->prepare(self::UPDATE_QUERY);
+		$stmt->bindValue(':title', $this->title, \PDO::PARAM_STR);
+		$stmt->bindValue(':description', $this->description, \PDO::PARAM_STR);
+		$stmt->bindValue(':teacher_description', $this->teacher_description, \PDO::PARAM_STR);
+		$stmt->bindValue(':annotation', $this->annotation, \PDO::PARAM_STR);
+		$stmt->bindValue(':due_date', $this->due_date, \PDO::PARAM_STR);
+		$stmt->bindValue(':reminder_sent_date', $this->reminder_sent_date, \PDO::PARAM_STR);
+		$stmt->bindValue(':percent', $this->percent, \PDO::PARAM_INT);
+		$stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
 
-		if ($result = $this->db->query($qry))
+		if ($stmt->execute())
 		{
 			return TRUE;
 		}
@@ -486,20 +490,20 @@ QRY
 				return FALSE;
 			}
 
-			$qry = sprintf(self::INSERT_QUERY,
-				$assignid,
-				$db->real_escape_string($title),
-				$db->real_escape_string(self::step_strip_tags($description)),
-				$db->real_escape_string(self::step_strip_tags($teacher_description)),
-				$db->real_escape_string(self::step_strip_tags($annotation)),
-				$position,
-				$due_date,
-				$percent
-			);
 			$this->db->beginTransaction();
-			if ($result = $db->query($qry))
+			$stmt = $this->db->prepare(self::INSERT_QUERY);
+			$stmt->bindValue(':assignid', $assignid, \PDO::PARAM_INT);
+			$stmt->bindValue(':title', $title, \PDO::PARAM_STR);
+			$stmt->bindValue(':description', $description, \PDO::PARAM_STR);
+			$stmt->bindValue(':teacher_description', $teacher_description, \PDO::PARAM_STR);
+			$stmt->bindValue(':annotation', $annotation, \PDO::PARAM_STR);
+			$stmt->bindValue(':position', $position, \PDO::PARAM_INT);
+			$stmt->bindValue(':due_date', $due_date, \PDO::PARAM_STR);
+			$stmt->bindValue(':percent', $percent, \PDO::PARAM_INT);
+
+			if ($stmt->execute())
 			{
-				$new_step_id = $db->insert_id;
+				$new_step_id = $db->lastInsertId();
 				$db->commit();
 				return new self($new_step_id, $user, $config, $db);
 			}

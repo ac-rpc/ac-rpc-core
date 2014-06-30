@@ -163,14 +163,11 @@ abstract class RPC_Step_Base
 	{
 		// Title is required
 		if (empty($this->title)) $this->invalid_fields['title'] = TRUE;
-		else $this->title = trim($this->db->real_escape_string(substr($this->title,0,512)));
+		else $this->title = trim(substr($this->title, 0, 512));
 		// Description not required
-		$this->description = self::step_strip_tags($this->description);
-		$this->description = trim($this->db->real_escape_string($this->description));
-		$this->teacher_description = self::step_strip_tags($this->teacher_description);
-		$this->teacher_description = trim($this->db->real_escape_string($this->teacher_description));
-		$this->annotation = self::step_strip_tags($this->annotation);
-		$this->annotation = trim($this->db->real_escape_string($this->annotation));
+		$this->description = trim(self::step_strip_tags($this->description));
+		$this->teacher_description = trim(self::step_strip_tags($this->teacher_description));
+		$this->annotation = trim(self::step_strip_tags($this->annotation));
 
 		if (count($this->invalid_fields) > 0)
 		{
@@ -225,8 +222,9 @@ abstract class RPC_Step_Base
 		{
 			$this->error = self::ERR_INVALID_INPUT;
 		}
-		$qry = sprintf("UPDATE steps SET position = %u WHERE stepid = %u;", $position, $this->id);
-		if ($result = $this->db->query($qry))
+		$qry = "UPDATE steps SET position = :position WHERE stepid = :stepid";
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':position' => $position, ':stepid' => $this->id)))
 		{
 			$this->position = $position;
 			return TRUE;
