@@ -60,13 +60,6 @@ class RPC_Template extends RPC_Assignment_Base
 	public $is_published;
 	/**
 	 * Predefined INSERT statement for assignment creation.
-	 * Params for sprintf():
-	 *    %u: userid
-	 *    %u: lastedit_userid
-	 *    %s: title
-	 *    %s: class
-	 *    %s: parent (integer or "NULL")
-	 *    %s: ancestraltemplate (integer or "NULL")
 	 */
 	const INSERT_QRY =
 		"INSERT INTO assignments (
@@ -78,29 +71,20 @@ class RPC_Template extends RPC_Assignment_Base
 			template,
 			parent,
 			ancestraltemplate
-		) VALUES (%u, %u, '%s', NULL, '%s', 1, %s, %s);";
+		) VALUES (:userid, :lastedit_userid, :title, NULL, :class, 1, :parent, :ancestraltemplate);";
 	/**
 	 * Predefined UPDATE statement for assignment update
-	 * Params for sprintf():
-	 *    %s: title
-	 *    %u: lastedit_userid
-	 *    %s: description
-	 *    %s: class
-	 *    %u: published (0|1)
-	 *    %s: parent (integer or "NULL")
-	 *    %s: ancestraltemplate (integer or "NULL")
-	 *    %u: assignid
 	 */
 	const UPDATE_QUERY =
 		"UPDATE assignments SET
-			lastedit_userid = %u,
-			title = '%s',
-			description = '%s',
-			class = '%s',
-			published = %u,
-			parent = %s,
-			ancestraltemplate = %s
-		WHERE assignid = %u;";
+			lastedit_userid = :lastedit_userid,
+			title = :title,
+			description = :description,
+			class = :class,
+			published = :published,
+			parent = :parent,
+			ancestraltemplate = :ancestraltemplate
+		WHERE assignid = :assignid";
 
 	/**
 	 * Retrieve an assignment template by unique id or create an empty object if $id===NULL
@@ -127,7 +111,7 @@ class RPC_Template extends RPC_Assignment_Base
 				return;
 			}
 
-			$qry = sprintf(<<<QRY
+			$qry = <<<QRY
 				SELECT
 					id,
 					userid,
@@ -142,16 +126,16 @@ class RPC_Template extends RPC_Assignment_Base
 					parent,
 					parent_type,
 					ancestral_template
-				FROM templates_vw WHERE id=%u;
-QRY
-				// sprintf params
-				, $id);
+				FROM templates_vw
+				WHERE id = :id
+				LIMIT 1
+QRY;
+			$stmt = $this->db->prepare($qry);
 
-
-			if ($result = $this->db->query($qry))
+			if ($stmt->execute(array(':id' => $id)))
 			{
 				// Assignment not located
-				if ($row = $result->fetch())
+				if ($row = $stmt->fetch())
 				{
 					// First get author and sharing information
 					$this->_active_userid = $user->id;
@@ -194,7 +178,7 @@ QRY
 					$this->ancestral_template = $row['ancestral_template'];
 					// Templates always get advanced editing
 					$this->default_edit_mode = "ADVANCED";
-					$result->closeCursor();
+					$stmt->closeCursor();
 
 					$this->url = self::get_url($this->id, "", $this->config);
 					$this->url_edit = self::get_url($this->id, "edit", $this->config);
@@ -231,18 +215,17 @@ QRY
 			$this->error = self::ERR_DATA_UNSANITIZED;
 			return FALSE;
 		}
-		// mysqli->real_escape_string() already called by sanitize()
-		$qry = sprintf(self::INSERT_QRY,
-			$user->id,
-			$user->id,
-			$this->title,
-			$this->class,
-			$this->parent > 0 ? $this->parent : "NULL",
-			$this->ancestral_template > 0 ? $this->ancestral_template : "NULL"
-		);
-		if ($result = $this->db->query($qry))
+		$stmt = $this->db->prepare(self::INSERT_QRY);
+		$stmt->bindValue(':userid', $user->id, \PDO::PARAM_INT);
+		$stmt->bindValue(':lastedit_userid', $user->id, \PDO::PARAM_INT);
+		$stmt->bindValue(':title', $this->title, \PDO::PARAM_STR);
+		$stmt->bindValue(':class', $this->class, \PDO::PARAM_STR);
+		$stmt->bindValue(':parent', ($this->parent > 0 ? $this->parent : NULL), \PDO::PARAM_INT);
+		$stmt->bindValue(':ancestraltemplate', ($this->ancestral_template > 0 ? $this->ancestral_template : NULL), \PDO::PARAM_INT);
+
+		if ($stmt->execute())
 		{
-			$this->id = $this->db->insert_id;
+			$this->id = $this->db->lastInsertId();
 			$this->author = $user->id;
 			$this->author_name = $user->name;
 			$this->lastedit_userid = $user->id;
@@ -288,21 +271,19 @@ QRY
 			$this->error = self::ERR_DATA_UNSANITIZED;
 			return FALSE;
 		}
-		// mysqli->real_escape_string() already called by sanitize()
-		$qry = sprintf(self::UPDATE_QUERY,
-			$this->_active_userid,
-			$this->title,
-			$this->description,
-			$this->class,
-			$this->is_published ? 1 : 0,
-			$this->parent > 0 ? $this->parent : "NULL",
-			$this->ancestral_template > 0 ? $this->ancestral_template : "NULL",
-			$this->id
-		);
+		$stmt = $this->db->prepare(self::UPDATE_QUERY);
+		$stmt->bindValue(':lastedit_userid', $this->_active_userid, \PDO::PARAM_INT);
+		$stmt->bindValue(':title', $this->title, \PDO::PARAM_STR);
+		$stmt->bindValue(':description', $this->description, \PDO::PARAM_STR);
+		$stmt->bindValue(':class', $this->class, \PDO::PARAM_STR);
+		$stmt->bindValue(':published', ($this->is_published ? 1 : 0), \PDO::PARAM_INT);
+		$stmt->bindValue(':parent', ($this->parent > 0 ? $this->parent : NULL), \PDO::PARAM_INT);
+		$stmt->bindValue(':ancestraltemplate', ($this->ancestral_template > 0 ? $this->ancestral_template : NULL), \PDO::PARAM_INT);
+		$stmt->bindValue(':assignid', $this->id, \PDO::PARAM_INT);
 
 		// Update the container assignment, and if successful, also update all
 		// the member steps
-		if ($result = $this->db->query($qry))
+		if ($stmt->execute())
 		{
 			foreach ($this->steps as $step)
 			{
@@ -337,8 +318,9 @@ QRY
 			return FALSE;
 		}
 		$saved = $is_saved ? 1 : 0;
-		$qry = sprintf("INSERT INTO template_usage (assignid, usertype, saved) VALUES (%u, '%s', %u);", $this->id, $user_type, $saved);
-		if ($result = $this->db->query($qry))
+		$qry = "INSERT INTO template_usage (assignid, usertype, saved) VALUES (:assignid, :usertype, :saved)";
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':assignid' => $this->id, ':usertype' => $user_type, ':saved' => $saved)))
 		{
 			return TRUE;
 		}

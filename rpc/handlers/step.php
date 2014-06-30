@@ -66,7 +66,7 @@ else
 		}
 		else
 		{
-			$assign->db->beginTransaction();
+			$db->beginTransaction();
 			switch ($_POST['action'])
 			{
 				case RPC_Step::ACTION_MOVE_TO_POS:

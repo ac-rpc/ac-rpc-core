@@ -140,10 +140,11 @@ class RPC_Linked_Assignment
 		}
 
 		$this->id = $id;
-		$qry = sprintf("SELECT assignid, userid, remind FROM linked_assignments WHERE linkid = %u;", $this->id);
-		if ($result = $this->db->query($qry))
+		$qry = "SELECT assignid, userid, remind FROM linked_assignments WHERE linkid = :linkid LIMIT 1";
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':linkid' => $this->id)))
 		{
-			if ($row = $result->fetch())
+			if ($row = $stmt->fetch())
 			{
 				// Check ownership. Only owner can view a linked assignment
 				if ($user == NULL || $row['userid'] != $user->id)
@@ -155,7 +156,7 @@ class RPC_Linked_Assignment
 					$this->is_editable = TRUE;
 					$this->send_reminders = $row['remind'] == 1 ? TRUE : FALSE;
 					$assignid = $row['assignid'];
-					$result->closeCursor();
+					$stmt->closeCursor();
 					if (RPC_Assignment::exists($assignid, $this->db))
 					{
 						$this->assignment = new RPC_Assignment($assignid, $user, $config, $db);
@@ -193,17 +194,18 @@ class RPC_Linked_Assignment
 				$this->url_delete = self::get_url($this->id, "delete", $this->config);
 
 				// Attach the linked assignment annotations to the assignment
-				$steps_qry = sprintf("SELECT stepid, annotation, remindersentdate FROM linked_steps WHERE linkid = %u;", $this->id);
-				if ($steps_result = $this->db->query($steps_qry))
+				$steps_qry = "SELECT stepid, annotation, remindersentdate FROM linked_steps WHERE linkid = :linkid";
+				$stmt = $this->db->prepare($steps_qry);
+				if ($stmt->execute(array(':linkid' => $this->id)))
 				{
 					$arr_step_annotations = array();
-					$rows = $steps_result->fetchAll();
+					$rows = $stmt->fetchAll();
 					foreach ($rows as $row)
 					{
 						$arr_step_annotations[$row['stepid']]['annotation'] = $row['annotation'];
 						$arr_step_annotations[$row['stepid']]['reminder_sent_date'] = $row['remindersentdate'];
 					}
-					$steps_result->closeCursor();
+					$stmt->closeCursor();
 
 					// Bind the annotations and reminder sent dates to the assignment steps
 					foreach ($this->assignment->steps as $step)
@@ -240,16 +242,17 @@ class RPC_Linked_Assignment
 			$this->error = self::ERR_NO_SUCH_ASSIGNMENT;
 			return FALSE;
 		}
-		$qry = sprintf("SELECT id, annotation, reminder_sent_date FROM linked_steps_view WHERE linkid = %u;", $this->id);
-		if ($result = $this->db->query($qry))
+		$qry = "SELECT id, annotation, reminder_sent_date FROM linked_steps_view WHERE linkid = :linkid";
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':linkid' => $this->id)))
 		{
-			$rows = $result->fetchAll();
+			$rows = $stmt->fetchAll();
 			foreach ($rows as $row)
 			{
 				$this->steps[$row['id']]->annotation = $row['annotation'];
 				$this->steps[$row['id']]->reminder_sent_date = $row['reminder_sent_date'];
 			}
-			$result->closeCursor();
+			$stmt->closeCursor();
 		}
 		return TRUE;
 	}
@@ -261,9 +264,9 @@ class RPC_Linked_Assignment
 	 */
 	public function delete()
 	{
-		$qry = sprintf("DELETE FROM linked_assignments WHERE linkid = %u;", $this->id);
-		echo $qry;
-		if ($result = $this->db->query($qry))
+		$qry = "DELETE FROM linked_assignments WHERE linkid = :linkid";
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':linkid' => $this->id)))
 		{
 			return TRUE;
 		}
@@ -284,8 +287,9 @@ class RPC_Linked_Assignment
 			$this->error = self::ERR_INVALID_INPUT;
 			return FALSE;
 		}
-		$qry = sprintf("UPDATE linked_assignments SET remind = %u WHERE linkid = %u;", $this->send_reminders === TRUE ? 1 : 0, $this->id);
-		if ($result = $this->db->query($qry))
+		$qry = "UPDATE linked_assignments SET remind = :remind WHERE linkid = :linkid";
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':remind' => ($this->send_reminders === TRUE ? 1 : 0), ':linkid' => $this->id)))
 		{
 			return TRUE;
 		}
@@ -309,8 +313,9 @@ class RPC_Linked_Assignment
 			$this->error = self::ERR_NO_SUCH_STEP;
 			return FALSE;
 		}
-		$qry = sprintf("UPDATE linked_steps SET annotation = '%s' WHERE linkid = %u and stepid = %u;", $this->steps[$stepid]->annotation, $this->id, $stepid);
-		if ($result = $this->db->query($qry))
+		$qry = "UPDATE linked_steps SET annotation = :annotation WHERE linkid = :linkid AND stepid = :stepid";
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':annotation' => $this->steps[$stepid]->annotation, ':linkid' => $this->id, ':stepid' => $stepid)))
 		{
 			return TRUE;
 		}
@@ -335,7 +340,7 @@ class RPC_Linked_Assignment
 	public function sanitize_step($stepid)
 	{
 		$this->steps[$stepid]->annotation = RPC_Step::step_strip_tags($this->steps[$stepid]->annotation);
-		$this->steps[$stepid]->annotation = trim($this->db->real_escape_string($this->steps[$stepid]->annotation));
+		$this->steps[$stepid]->annotation = trim($this->steps[$stepid]->annotation);
 		return TRUE;
 	}
 	/**
@@ -375,17 +380,25 @@ class RPC_Linked_Assignment
 	 */
 	public static function create($assignment, $user, $db)
 	{
-		$qry = sprintf("INSERT INTO linked_assignments (assignid, userid) VALUES (%u, %u);", $assignment->id, $user->id);
-		if ($result = $db->query($qry))
+		$qry = "INSERT INTO linked_assignments (assignid, userid) VALUES (:assignid, :userid)";
+		$stmt = $db->prepare($qry);
+		if ($stmt->execute(array(':assignid' => $assignment->id, ':userid' => $user->id)))
 		{
-			$new_linkid = $db->insert_id;
+			$new_linkid = $db->lastInsertId();
+			$stmt = null;
+
+			$arr_row_placeholders = array();
 			$arr_row_values = array();
 			foreach ($assignment->steps as $step)
 			{
-				$arr_row_values[] = sprintf("(%u,%u)", $new_linkid, $step->id);
+				$arr_row_placeholders[] = "(?, ?)";
+				$arr_row_values[] = $new_linkid;
+				$arr_row_values[] = $step->id;
 			}
-			$steps_qry = "INSERT INTO linked_steps (linkid, stepid) VALUES " . implode(",", $arr_row_values) . ";";
-			if ($steps_result = $db->query($steps_qry))
+
+			$steps_qry = "INSERT INTO linked_steps (linkid, stepid) VALUES " . implode(",", $arr_row_placeholders);
+			$stmt = $db->prepare($steps_qry);
+			if ($stmt->execute($arr_row_values))
 			{
 				return $new_linkid;
 			}
@@ -408,12 +421,14 @@ class RPC_Linked_Assignment
 	 */
 	public static function exists($assignid, $userid, $db)
 	{
-		$qry = sprintf("SELECT linkid FROM linked_assignments WHERE assignid = %u AND userid = %u;", $assignid, $userid);
-		if ($result = $db->query($qry))
+		$qry = "SELECT COUNT(*) AS count FROM linked_assignments WHERE assignid = :assignid AND userid = :userid";
+		$stmt = $db->prepare($qry);
+
+		if ($stmt->execute(array(':assignid' => $assignid, ':userid' => $userid)))
 		{
-			$rows = $result->num_rows;
-			$result->closeCursor();
-			return $rows > 0 ? TRUE : FALSE;
+			$row = $stmt->fetch();
+			$stmt->closeCursor();
+			return ($row['count'] > 0);
 		}
 		else return FALSE;
 	}

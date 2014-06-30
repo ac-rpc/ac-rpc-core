@@ -99,15 +99,6 @@ class RPC_Assignment extends RPC_Assignment_Base
 
 	/**
 	 * Predefined INSERT statement for assignment creation.
-	 * Params for sprintf():
-	 *    %u: userid
-	 *    %u: lastedit_userid
-	 *    %s: title
-	 *    %s: class
-	 *    %u: startdate (UNIX timestamp)
-	 *    %u: duedate (UNIX timestamp)
-	 *    %s: parent (integer or "NULL")
-	 *    %s: ancestraltemplate (integer or "NULL")
 	 */
 	const INSERT_QRY =
 		"INSERT INTO assignments (
@@ -120,35 +111,23 @@ class RPC_Assignment extends RPC_Assignment_Base
 			duedate,
 			parent,
 			ancestraltemplate
-		) VALUES (%u, %u, '%s', NULL, '%s', FROM_UNIXTIME(%u), FROM_UNIXTIME(%u), %s, %s);";
+		) VALUES (:userid, :lastedit_userid, :title, NULL, :class, FROM_UNIXTIME(:startdate), FROM_UNIXTIME(:duedate), :parent, :ancestraltemplate);";
 	/**
 	 * Predefined UPDATE statement for assignment update
-	 * Params for sprintf():
-	 *    %u: lastedit_userid
-	 *    %s: title
-	 *    %s: description
-	 *    %s: class
-	 *    %u: startdate (UNIX timestamp)
-	 *    %u: duedate (UNIX timestamp)
-	 *    %u: remind (boolean 0|1)
-	 *    %u: shared (boolean 0|1)
-	 *    %s: parent (integer or "NULL")
-	 *    %s: ancestraltemplate (integer or "NULL")
-	 *    %u: assignid
 	 */
 	const UPDATE_QUERY =
 		"UPDATE assignments SET
-			lastedit_userid = %u,
-			title = '%s',
-			description = '%s',
-			class = '%s',
-			startdate = FROM_UNIXTIME(%u),
-			duedate = FROM_UNIXTIME(%u),
-			remind = %u,
-			shared = %u,
-			parent = %s,
-			ancestraltemplate = %s
-		WHERE assignid = %u;";
+			lastedit_userid = :lastedit_userid,
+			title = :title,
+			description = :description,
+			class = :class,
+			startdate = FROM_UNIXTIME(:startdate),
+			duedate = FROM_UNIXTIME(:duedate),
+			remind = :remind,
+			shared = :shared,
+			parent = :parent,
+			ancestraltemplate = :ancestraltemplate
+		WHERE assignid = :assignid";
 
 	/**
 	 * Retrieve an assignment by unique id or create an empty object if $id===NULL
@@ -175,7 +154,7 @@ class RPC_Assignment extends RPC_Assignment_Base
 				return;
 			}
 
-			$qry = sprintf(<<<QRY
+			$qry = <<<QRY
 				SELECT
 					id,
 					userid,
@@ -192,16 +171,18 @@ class RPC_Assignment extends RPC_Assignment_Base
 					parent,
 					parent_type,
 					ancestral_template
-				FROM assignments_brief_vw WHERE id=%u;
-QRY
+				FROM assignments_brief_vw 
+				WHERE id = :id
+				LIMIT 1
+QRY;
 				// sprintf params
-				, $id);
+			$stmt = $this->db->prepare($qry);
 
 
-			if ($result = $this->db->query($qry))
+			if ($stmt->execute(array(':id' => $id)))
 			{
 				// Assignment not located
-				if ($row = $result->fetch())
+				if ($row = $stmt->fetch())
 				{
 					// First get author and sharing information
 					$this->_active_userid = $user->id;
@@ -258,7 +239,7 @@ QRY
 
 						// Direct descendants of templates get basic mode for students.
 						$this->default_edit_mode = $user->type == "STUDENT" && $this->parent_type == "template" ? "BASIC" : "ADVANCED";
-						$result->closeCursor();
+						$stmt->closeCursor();
 
 						$this->url = self::get_url($this->id, "", $this->config);
 						$this->url_edit = self::get_url($this->id, "edit", $this->config);
@@ -319,20 +300,19 @@ QRY
 			$this->error = self::ERR_DATA_UNSANITIZED;
 			return FALSE;
 		}
-		// mysqli->real_escape_string() has already been called by sanitize()
-		$qry = sprintf(self::INSERT_QRY,
-			$user->id,
-			$user->id,
-			$this->title,
-			$this->class,
-			$this->start_date,
-			$this->due_date,
-			$this->parent > 0 ? $this->parent : "NULL",
-			$this->ancestral_template > 0 ? $this->ancestral_template : "NULL"
-		);
-		if ($result = $this->db->query($qry))
+		$stmt = $this->db->prepare(self::INSERT_QRY);
+		$stmt->bindValue(':userid', $user->id, \PDO::PARAM_INT);
+		$stmt->bindValue(':lastedit_userid', $user->id, \PDO::PARAM_INT);
+		$stmt->bindValue(':title', $this->title, \PDO::PARAM_STR);
+		$stmt->bindValue(':class', $this->class, \PDO::PARAM_STR);
+		$stmt->bindValue(':startdate', $this->start_date, \PDO::PARAM_INT);
+		$stmt->bindValue(':duedate', $this->due_date, \PDO::PARAM_INT);
+		$stmt->bindValue(':parent', ($this->parent > 0 ? $this->parent : NULL), \PDO::PARAM_INT);
+		$stmt->bindValue(':ancestraltemplate', ($this->ancestral_template > 0 ? $this->ancestral_template : NULL), \PDO::PARAM_INT);
+
+		if ($stmt->execute())
 		{
-			$this->id = $this->db->insert_id;
+			$this->id = $this->db->lastInsertId();
 			$this->author = $user->id;
 			$this->_active_userid = $user->id;
 			return $this->id;
@@ -362,24 +342,22 @@ QRY
 			$this->error = self::ERR_DATA_UNSANITIZED;
 			return FALSE;
 		}
-		// mysqli->real_escape_string() already called by sanitize()
-		$qry = sprintf(self::UPDATE_QUERY,
-			$this->_active_userid,
-			$this->title,
-			$this->description,
-			$this->class,
-			$this->start_date,
-			$this->due_date,
-			$this->send_reminders ? 1 : 0,
-			$this->is_shared ? 1 : 0,
-			$this->parent > 0 ? $this->parent : "NULL",
-			$this->ancestral_template > 0 ? $this->ancestral_template : "NULL",
-			$this->id
-		);
+		$stmt = $this->db->prepare(self::UPDATE_QUERY);
+		$stmt->bindValue(':lastedit_userid', $this->_active_userid, \PDO::PARAM_INT);
+		$stmt->bindValue(':title', $this->title, \PDO::PARAM_STR);
+		$stmt->bindValue(':description', $this->description, \PDO::PARAM_STR);
+		$stmt->bindValue(':class', $this->class, \PDO::PARAM_STR);
+		$stmt->bindValue(':startdate', $this->start_date, \PDO::PARAM_INT);
+		$stmt->bindValue(':duedate', $this->due_date, \PDO::PARAM_INT);
+		$stmt->bindValue(':remind', ($this->send_reminders ? 1 : 0), \PDO::PARAM_INT);
+		$stmt->bindValue(':shared', ($this->is_shared ? 1 : 0), \PDO::PARAM_INT);
+		$stmt->bindValue(':parent', ($this->parent > 0 ? $this->parent : NULL), \PDO::PARAM_INT);
+		$stmt->bindValue(':ancestraltemplate', ($this->ancestral_template > 0 ? $this->ancestral_template : NULL), \PDO::PARAM_INT);
+		$stmt->bindValue(':assignid', $this->id, \PDO::PARAM_INT);
 
 		// Update the container assignment, and if successful, also update all
 		// the member steps
-		if ($result = $this->db->query($qry))
+		if ($stmt->execute())
 		{
 			foreach ($this->steps as $step)
 			{
@@ -520,10 +498,8 @@ QRY
 			if ($user)
 			{
 				// Any update failure blocks the transaction.
-				// TODO: Fix escaping issue
-				// Doing a $step->update() here causes problems with real_escape_string() if the
-				// step was just created.  Don't know why yet.
-				if (!$result = $step->db->query(sprintf("UPDATE steps SET reminderdate=FROM_UNIXTIME(%u) WHERE stepid=%u;", $current_due_date, $step->id)))
+				$stmt = $step->db->prepare("UPDATE steps SET reminderdate = FROM_UNIXTIME(:unixtime) WHERE stepid = :stepid");
+				if (!$stmt->execute(array(':unixtime' => $current_due_date, ':stepid' => $step->id)))
 				{
 					$this->error = self::ERR_CANNOT_CALCULATE_STEPDATES;
 					return FALSE;
@@ -608,12 +584,13 @@ QRY
 	 */
 	public function update_step_due_dates($step_dates)
 	{
-		$qry = "UPDATE steps SET reminderdate = FROM_UNIXTIME(%u) WHERE stepid = %u;";
+		$qry = "UPDATE steps SET reminderdate = FROM_UNIXTIME(:unixtime) WHERE stepid = :stepid";
+		$stmt = $this->db->prepare($qry);
 		foreach ($this->steps as $step)
 		{
 			if (array_key_exists($step->id, $step_dates))
 			{
-				$result = $this->db->query(sprintf($qry, $step_dates[$step->id], $step->id));
+				$result = $stmt->execute(array(':unixtime' => $step_dates[$step->id], ':stepid' => $step->id));
 				// Any failure will exit
 				if (!$result) return FALSE;
 			}

@@ -217,15 +217,16 @@ abstract class RPC_Assignment_Base
 	{
 		// Initialize in case we're reloading...
 		$this->steps = array();
-		$qry = sprintf("SELECT stepid, position FROM steps WHERE assignid=%u ORDER BY position, reminderdate;", $this->id);
-		if ($result = $this->db->query($qry))
+		$qry = "SELECT stepid, position FROM steps WHERE assignid = :assignid ORDER BY position, reminderdate";
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':assignid' => $this->id)))
 		{
-			$rows = $result->fetchAll();
+			$rows = $stmt->fetchAll();
 			foreach ($rows as $row)
 			{
 				$this->steps[$row['stepid']] = new RPC_Step($row['stepid'], $user, $this->config, $this->db);
 			}
-			$result->closeCursor();
+			$stmt->closeCursor();
 			return TRUE;
 		}
 		else
@@ -248,8 +249,9 @@ abstract class RPC_Assignment_Base
 			$this->error = self::ERR_READONLY;
 			return FALSE;
 		}
-		$qry = sprintf("DELETE FROM assignments WHERE assignid=%u;", $this->id);
-		if ($result = $this->db->query($qry))
+		$qry = "DELETE FROM assignments WHERE assignid = :assignid";
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':assignid' => $this->id)))
 		{
 			return TRUE;
 		}
@@ -269,23 +271,25 @@ abstract class RPC_Assignment_Base
 	public function normalize_steps()
 	{
 		// Query step positions, forcing ascending order
-		$qry = sprintf("SELECT stepid FROM steps WHERE assignid = %u ORDER BY position ASC, reminderdate ASC;", $this->id);
-		if ($result = $this->db->query($qry))
+		$qry = "SELECT stepid FROM steps WHERE assignid = :assignid ORDER BY position ASC, reminderdate ASC";
+		$stmt = $this->db->prepare($qry);
+	
+		if ($stmt->execute(array(':assignid' => $this->id)))
 		{
 			$arr_raw_steps = array();
-			$rows = $result->fetchAll();
+			$rows = $stmt->fetchAll();
 			foreach ($rows as $row)
 			{
 				$arr_raw_steps[] = $row;
 			}
-			$result->closeCursor();
+			$stmt->closeCursor();
 
 			// Since the query result is already ordered, iterate over and
 			// update all the positions starting with 1
+			$upd_stmt = $this->db->prepare("UPDATE steps SET position = :position WHERE stepid = :stepid");
 			for ($i = 1; $i <= count($arr_raw_steps); $i++)
 			{
-				$upd_qry = sprintf("UPDATE steps SET position = %u WHERE stepid = %u;", $i, $arr_raw_steps[$i-1]['stepid']);
-				if (!$upd_result = $this->db->query($upd_qry))
+				if ($upd_stmt->execute(array(':position' => $i, ':stepid' => $arr_raw_steps[$i-1]['stepid'])))
 				{
 					// Any failure, bail out.
 					$this->error = self::ERR_DB_ERROR;
@@ -350,13 +354,13 @@ abstract class RPC_Assignment_Base
 		if ($new_position > $old_position)
 		{
 			// Shift them down one place
-			$new_pos_query = "UPDATE steps SET position = position - 1 WHERE assignid = %u AND stepid <> %u AND position <= %u;";
+			$new_pos_query = "UPDATE steps SET position = position - 1 WHERE assignid = :assignid AND stepid <> :stepid AND position <= :position";
 		}
 		// If positon went down, increase positions at or above.
 		else if ($new_position < $old_position)
 		{
 			// Shift them up one place
-			$new_pos_query = "UPDATE steps SET position = position + 1 WHERE assignid = %u AND stepid <> %u AND position >= %u;";
+			$new_pos_query = "UPDATE steps SET position = position + 1 WHERE assignid = :assignid AND stepid <> :stepid AND position <= :position";
 		}
 		// No position change, just return TRUE
 		else
@@ -364,7 +368,8 @@ abstract class RPC_Assignment_Base
 			return TRUE;
 		}
 
-		if (!$upd_result = $this->db->query(sprintf($new_pos_query, $this->id, $stepid, $new_position)))
+		$stmt = $this->db->prepare($new_pos_query);
+		if (!$stmt->execute(array(':assignid' => $this->id, ':stepid' => $stepid, ':position' => $new_position)))
 		{
 			$this->error = self::ERR_DB_ERROR;
 			return FALSE;
@@ -442,11 +447,11 @@ abstract class RPC_Assignment_Base
 		}
 		// $title: string(512) not null
 		if (empty($this->title)) $this->invalid_fields['title'] = TRUE;
-		else $this->title = trim($this->db->real_escape_string(substr($this->title,0,512)));
+		else $this->title = trim(substr($this->title, 0, 512));
 		// $class: string(128) null
-		$this->class = trim($this->db->real_escape_string(substr($this->class,0,128)));
+		$this->class = trim(substr($this->class, 0, 128));
 		// $description: string null
-		$this->description = trim($this->db->real_escape_string($this->description));
+		$this->description = trim($this->description);
 
 		// Anything invalid, return FALSE
 		if (count($this->invalid_fields) > 0)
@@ -501,17 +506,18 @@ abstract class RPC_Assignment_Base
 	public static function exists($id, $db)
 	{
 		if (!ctype_digit(strval($id))) return FALSE;
-		$assign_qry = "SELECT assignid FROM assignments WHERE assignid=$id";
-		if ($result = $db->query($assign_qry))
+		$qry = "SELECT assignid FROM assignments WHERE assignid = :assignid LIMIT 1";
+		$stmt = $db->prepare($qry);
+		if ($stmt->execute(array(':assignid' => $id)))
 		{
-			if ($result->num_rows < 1)
+			if ($stmt->fetch())
 			{
-				$result->closeCursor();
+				$stmt->closeCursor();
 				return FALSE;
 			}
 			else
 			{
-				$result->closeCursor();
+				$stmt->closeCursor();
 				return TRUE;
 			}
 		}

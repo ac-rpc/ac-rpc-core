@@ -213,7 +213,7 @@ QRY;
 		}
 		$qry = "DELETE FROM steps WHERE stepid = :stepid";
 		$stmt = $this->db->prepare($qry);
-		if ($stmt->execute(':stepid' => $this->id))
+		if ($stmt->execute(array(':stepid' => $this->id)))
 		{
 			return TRUE;
 		}
@@ -410,7 +410,7 @@ QRY;
 		$stmt->bindValue(':due_date', $this->due_date, \PDO::PARAM_STR);
 		$stmt->bindValue(':reminder_sent_date', $this->reminder_sent_date, \PDO::PARAM_STR);
 		$stmt->bindValue(':percent', $this->percent, \PDO::PARAM_INT);
-		$stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
+		$stmt->bindValue(':stepid', $this->id, \PDO::PARAM_INT);
 
 		if ($stmt->execute())
 		{
@@ -490,8 +490,13 @@ QRY;
 				return FALSE;
 			}
 
-			$this->db->beginTransaction();
-			$stmt = $this->db->prepare(self::INSERT_QUERY);
+			$in_local_trans = FALSE;
+			if (!$db->inTransaction())
+			{
+				$db->beginTransaction();
+				$in_local_trans = TRUE;
+			}
+			$stmt = $db->prepare(self::INSERT_QUERY);
 			$stmt->bindValue(':assignid', $assignid, \PDO::PARAM_INT);
 			$stmt->bindValue(':title', $title, \PDO::PARAM_STR);
 			$stmt->bindValue(':description', $description, \PDO::PARAM_STR);
@@ -504,12 +509,18 @@ QRY;
 			if ($stmt->execute())
 			{
 				$new_step_id = $db->lastInsertId();
-				$db->commit();
+				if ($in_local_trans)
+				{
+					$db->commit();
+				}
 				return new self($new_step_id, $user, $config, $db);
 			}
 			else
 			{
-				$db->rollBack();
+				if ($in_local_trans)
+				{
+					$db->rollBack();
+				}
 				return FALSE;
 			}
 		}
