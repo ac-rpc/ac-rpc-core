@@ -41,7 +41,7 @@ CREATE TABLE users
 	 * by a remote system or plugin.
 	 */
 	password VARCHAR(256) NULL,
-	passwordsalt VARCHAR(10) NOT NULL DEFAULT '',
+	passwordsalt VARCHAR(255) NOT NULL DEFAULT '',
 	hashtype VARCHAR(16) NOT NULL DEFAULT '',
 	email VARCHAR(255) NOT NULL UNIQUE,
 	name VARCHAR(256) NULL,
