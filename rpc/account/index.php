@@ -100,14 +100,20 @@ switch ($account_action)
 					{
 						if ($_POST['password'] == $_POST['password-confirm'] && Native_User::password_meets_complexity($_POST['password']))
 						{
+							$db->beginTransaction();
 							if ($reset_user->set_password(NULL, $_POST['password'], TRUE))
 							{
+								$db->commit();
 								$reset_user->clear_reset_token();
 								$smarty->assign('login_success', "Your password has been updated. Please <a href='" . $config->app_relative_web_path . "?acct=login'>login</a> with your new password.");
 								$smarty->assign('login_handler', $config->app_relative_web_path . '?acct=login');
 								// $_SESSION['transid'] = md5(time() . rand());
 								// $smarty->assign('transid', $_SESSION['transid']);
 								$form = 'forms/native_login.tpl';
+							}
+							else
+							{
+								$db->rollBack();
 							}
 						}
 						else
@@ -226,7 +232,7 @@ switch ($account_action)
 									if (empty($user->error))
 									{
 										// Old password is empty string, since none has yet been set
-										$created_user->set_password("", $_POST['password']);
+										$created_user->set_password("", $_POST['password'], TRUE);
 
 										// Login the new user
 										$created_user->set_authenticated();

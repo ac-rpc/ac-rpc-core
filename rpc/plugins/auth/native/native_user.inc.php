@@ -102,12 +102,12 @@ class Native_User extends RPC_User
 	{
 		$this->config = $config;
 		$this->db = $db;
-		$dbusername = $this->db->real_escape_string(strtoupper($username));
-		$qry = sprintf("SELECT userid, username, password, passwordsalt, hashtype, email, name, usertype, perms, token FROM users WHERE UPPER(username) = '%s'", $dbusername);
-		if ($result = $this->db->query($qry))
+		$qry = "SELECT userid, username, password, passwordsalt, hashtype, email, name, usertype, perms, token FROM users WHERE UPPER(username) = :username LIMIT 1";
+		$stmt = $db->prepare($qry);
+		if ($stmt->execute(array(':username' => strtoupper($username))))
 		{
 			// Got results, load object
-			if ($row = $result->fetch())
+			if ($row = $stmt->fetch())
 			{
 				$this->id = intval($row['userid']);
 				$this->username = htmlentities($row['username'], ENT_QUOTES);
@@ -146,6 +146,7 @@ class Native_User extends RPC_User
 			{
 				$this->error = self::ERR_NO_SUCH_USER;
 			}
+			$stmt->closeCursor();
 		}
 		// Some database failure and the query didn't finish
 		else
@@ -168,9 +169,9 @@ class Native_User extends RPC_User
 	{
 		if (self::validate_email($email))
 		{
-			$qryemail = $this->db->real_escape_string(strtolower($email));
-			$qry = sprintf("UPDATE users SET username='%s', email='%s' WHERE userid=%u", $qryemail, $qryemail, $this->id);
-			if ($result = $this->db->query($qry))
+			$email = strtolower($email);
+			$stmt = $this->db->prepare("UPDATE users SET username = :username, email = :email WHERE userid = :userid");
+			if ($stmt->execute(array(':username' => $email, ':email' => $email, ':userid' => $this->id)))
 			{
 				$this->username = $email;
 				$this->email = $email;
@@ -198,14 +199,12 @@ class Native_User extends RPC_User
 		// Validate legacy sha1 passwords, and rehash them if successful
 		if ($this->hashtype == 'sha1')
 		{
-			$qry = sprintf("SELECT 1 FROM users WHERE username = '%s' AND password = '%s';",
-				$this->db->real_escape_string($this->username),
-				$this->db->real_escape_string(sha1($password . $this->salt))
-		    );
-			if ($result = $this->db->query($qry))
+			$stmt = $this->db->prepare("SELECT 1 FROM users WHERE username = :username AND password = :password LIMIT 1");
+			if ($stmt->execute(array(':username' => $this->username, ':password' => sha1($password, $this->salt))))
 			{
-				if ($row = $result->fetch())
+				if ($row = $stmt->fetch())
 				{
+					$stmt->closeCursor();
 					// Legacy users need to be rehashed into bcrypt
 					$this->db->beginTransaction();
 					if ($this->_set_password($password)) {
@@ -225,12 +224,13 @@ class Native_User extends RPC_User
 		}
 		else if ($this->hashtype == 'bcrypt')
 		{
-			$qry = sprintf("SELECT password FROM users WHERE username = '%s';", $this->db->real_escape_string($this->username));
-			if ($result = $this->db->query($qry))
+			$stmt = $this->db->prepare("SELECT password FROM users WHERE username = :username LIMIT 1");
+			if ($stmt->execute(array(':username' => $this->username)))
 			{
 				// Successful authentication
-				if ($row = $result->fetch())
+				if ($row = $stmt->fetch())
 				{
+					$stmt->closeCursor();
 					if (password_verify($password, $row['password']))
 					{
 						$this->set_authenticated();
@@ -292,12 +292,13 @@ class Native_User extends RPC_User
 	{
 		// Just remove the old one.
 		$this->destroy_session();
-		$session = $this->db->real_escape_string(md5(time() . rand()));
-		$token = $this->db->real_escape_string(md5(time() . rand()));
-		$qry = sprintf("INSERT INTO native_sessions (userid, session, token) VALUES (%u, '%s', '%s');", $this->id, $session, $token);
+		$session = md5(time() . rand());
+		$token = md5(time() . rand());
+		$qry = "INSERT INTO native_sessions (userid, session, token) VALUES (:userid, :session, :token)";
 
 		$this->db->beginTransaction();
-		if ($result = $this->db->query($qry))
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':userid' => $this->id, ':session' => $session, ':token' => $token)))
 		{
 			$this->db->commit();
 			$this->session = $session;
@@ -317,9 +318,10 @@ class Native_User extends RPC_User
 	 */
 	public function destroy_session()
 	{
-		$qry = sprintf("DELETE FROM native_sessions WHERE userid = %u AND session = '%s';", $this->id, $this->db->real_escape_string($this->session));
+		$qry = "DELETE FROM native_sessions WHERE userid = :userid AND session = :session";
 		$this->db->beginTransaction();
-		if ($result = $this->db->query($qry))
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':userid' => $this->id, ':session' => $this->session)))
 		{
 			$this->db->commit();
 			$this->session = "";
@@ -342,9 +344,11 @@ class Native_User extends RPC_User
 	public function set_token()
 	{
 		$token = md5(time() . rand());
-		$qry = sprintf("UPDATE native_sessions SET token = '%s' WHERE userid = %u AND session = '%s';", $this->db->real_escape_string($token), $this->id, $this->db->real_escape_string($this->session));
+		$qry = "UPDATE native_sessions SET token = :token WHERE userid = :userid AND session = :session";
+	
 		$this->db->beginTransaction();
-		if ($result = $this->db->query($qry))
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':token' => $token, ':userid' => $this->id, ':session' => $this->session)))
 		{
 			$this->db->commit();
 			$this->token = $token;
@@ -400,28 +404,24 @@ class Native_User extends RPC_User
 	{
 		if ($cookie = self::parse_cookie())
 		{
-			$qry = sprintf(<<<QRY
+			$qry = <<<QRY
 				SELECT 1
-				FROM native_sessions JOIN users ON native_sessions.userid = users.userid
-				WHERE users.username = '%s' AND native_sessions.session = '%s' AND native_sessions.token = '%s';
-QRY
-				, $db->real_escape_string($cookie['username']),
-				  $db->real_escape_string($cookie['session']),
-				  $db->real_escape_string($cookie['token'])
-			);
-			if ($result = $db->query($qry))
+				FROM native_sessions
+				JOIN users ON native_sessions.userid = users.userid
+				WHERE users.username = :username AND native_sessions.session = :session AND native_sessions.token = :token;
+QRY;
+			$stmt = $db->prepare($qry);
+			$stmt->execute(array(':username' => $cookie['username'], ':session' => $cookie['session'], ':token' => $cookie['token']));
+			// Successful cookie validation, return username.
+			if ($stmt->fetch())
 			{
-				// Successful cookie validation, return username.
-				if ($result->num_rows == 1)
-				{
-					$result->closeCursor();
-					return $cookie['username'];
-				}
-				else
-				{
-					$result->closeCursor();
-					return FALSE;
-				}
+				$stmt->closeCursor();
+				return $cookie['username'];
+			}
+			else
+			{
+				$stmt->closeCursor();
+				return FALSE;
 			}
 		}
 		// Cookie wasn't set or was invalid
@@ -491,16 +491,26 @@ QRY
 	 */
 	private function _set_password($newpassword)
 	{
-		$newpassword_hash = $this->db->real_escape_string(password_hash($newpassword, PASSWORD_DEFAULT, array('cost' => 12)));
+		$newpassword_hash = password_hash($newpassword, PASSWORD_DEFAULT, array('cost' => 12));
 
 		// Updated hashes as bcrypt stores the salt with the hash, so the salt column is legacy
 		$hashinfo = password_get_info($newpassword_hash);
 
-		$qry = sprintf("UPDATE users SET password = '%s', passwordsalt = 'BCRYPT-UNUSED', hashtype = '%s'  WHERE userid = %u;", $newpassword_hash, $hashinfo['algoName'], $this->id);
-		$this->db->beginTransaction();
-		if ($result = $this->db->query($qry))
+		$qry = "UPDATE users SET password = :password, passwordsalt = 'BCRYPT-UNUSED', hashtype = :hashtype  WHERE userid = :userid";
+		$in_local_trans = FALSE;
+		if (!$this->db->inTransaction())
 		{
-			$this->db->commit();
+			$in_local_trans = TRUE;
+			$this->db->beginTransaction();
+		}
+		$stmt = $this->db->prepare($qry);
+		$params = array(':password' => $newpassword_hash, ':hashtype' => $hashinfo['algoName'], ':userid' => $this->id);
+		if ($stmt->execute($params))
+		{
+			if ($in_local_trans)
+			{
+				$this->db->commit();
+			}
 			$this->password_hash = $newpassword_hash;
 			$this->salt = NULL;
 			$this->hashtype = 'bcrypt';
@@ -508,7 +518,10 @@ QRY
 		}
 		else
 		{
-			$this->db->rollBack();
+			if ($in_local_trans)
+			{
+				$this->db->rollBack();
+			}
 			$this->error = self::ERR_DB_ERROR;
 			return FALSE;
 		}
@@ -522,15 +535,29 @@ QRY
 	private function _update_last_login()
 	{
 		// Update the login timestamp
-		$this->db->beginTransaction();
-		if ($this->db->query(sprintf("UPDATE users SET last_login = NOW() WHERE username = '%s';", $this->db->real_escape_string($this->username))))
+		$in_local_trans = FALSE;
+		// This may eventually be called independently
+		// of set_authenticated() and need a transaction
+		if (!$this->db->inTransaction())
 		{
-			$this->db->commit();
+			$this->db->beginTransaction();
+			$in_local_trans = TRUE;
+		}
+		$stmt = $this->db->prepare("UPDATE users SET last_login = NOW() WHERE username = :username");
+		if ($stmt->execute(array(':username' => $this->username)))
+		{
+			if ($in_local_trans)
+			{
+				$this->db->commit();
+			}
 			return TRUE;
 		}
 		else
 		{
-			$this->db->rollBack();
+			if ($in_local_trans)
+			{
+				$this->db->rollBack();
+			}
 			return FALSE;
 		}
 	}
@@ -683,12 +710,14 @@ HEADERS;
    */
   public static function get_user_by_token($token, $config, $db)
   {
-    $qry = sprintf("SELECT username FROM users WHERE reset_token = '%s' AND reset_token_expires >= NOW()", $db->real_escape_string($token));
-    if ($result = $db->query($qry))
+	$qry = "SELECT username FROM users WHERE reset_token = :token AND reset_token_expires >= NOW()";
+	$stmt = $db->prepare($qry);
+    if ($stmt->execute(array(':token' => $token)))
     {
-		if ($row = $result->fetch())
+		if ($row = $stmt->fetch())
 		{
 			$user = new self($row['username'], $config, $db);
+			$stmt->closeCursor();
 			return $user;
 		}
     }

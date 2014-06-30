@@ -197,8 +197,7 @@ class RPC_User
 		// Querying user by username
 		if ($query_type == self::RPC_QUERY_USER_BY_USERNAME)
 		{
-			$dbuserquery = $this->db->real_escape_string(strtoupper($query));
-			$qry = sprintf("SELECT userid, username, email, name, usertype, perms FROM users WHERE UPPER(username)='%s';", $dbuserquery);
+			$qry = "SELECT userid, username, email, name, usertype, perms FROM users WHERE UPPER(username) = UPPER(:query) LIMIT 1";
 		}
 		// Querying user by ID
 		else if ($query_type == self::RPC_QUERY_USER_BY_ID)
@@ -208,7 +207,7 @@ class RPC_User
 				$this->error = self::ERR_INVALID_INPUT;
 				return;
 			}
-			$qry = sprintf("SELECT userid, username, email, name, usertype, perms FROM users WHERE userid=%u;", $query);
+			$qry = "SELECT userid, username, email, name, usertype, perms FROM users WHERE userid = :query LIMIT 1";
 		}
 		// Just return an empty object, useful where guest authorization is OK
 		else if ($query_type == self::RPC_DO_NOT_QUERY)
@@ -220,11 +219,15 @@ class RPC_User
 			$this->error = self::ERR_INVALID_QUERY_TYPE;
 			return;
 		}
-		if ($result = $this->db->query($qry))
+
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':query' => $query)))
 		{
 			// Got results, load object
-			if ($row = $result->fetch())
+			if ($row = $stmt->fetch())
 			{
+				$stmt->closeCursor();
+
 				$this->id = intval($row['userid']);
 				$this->username = htmlentities($row['username'], ENT_QUOTES);
 				$this->name = !empty($row['name']) ? htmlentities($row['name'], ENT_QUOTES) : htmlentities($row['username'], ENT_QUOTES);
@@ -275,9 +278,10 @@ class RPC_User
 	public function set_name($name)
 	{
 		// Truncate to 256 chars
-		$qryname = $this->db->real_escape_string(substr($name,0,256));
-		$qry = sprintf("UPDATE users SET name='%s' WHERE userid=%u;", $qryname, $this->id);
-		if ($result = $this->db->query($qry))
+		$name = substr($name, 0, 256);
+		$qry = "UPDATE users SET name = :name WHERE userid = :userid";
+		$stmt = $this->db->prepare($qry);
+		if ($stmt->execute(array(':name' => $name, ':userid' => $this->id)))
 		{
 			$this->name = $name;
 			return TRUE;
@@ -300,9 +304,9 @@ class RPC_User
 	{
 		if (self::validate_email($email))
 		{
-			$qryemail = $this->db->real_escape_string($email);
-			$qry = sprintf("UPDATE users SET email='%s' WHERE userid=%u", $qryemail, $this->id);
-			if ($result = $this->db->query($qry))
+			$qry = "UPDATE users SET email = :email WHERE userid = :userid";
+			$stmt = $this->db->prepare($qry);
+			if ($stmt->execute(array(':email' => strtolower($email), ':userid' => $this->id)))
 			{
 				$this->email = $email;
 				return TRUE;
@@ -331,8 +335,9 @@ class RPC_User
 		}
 		else
 		{
-			$qry = sprintf("UPDATE users SET usertype='%s' WHERE userid=%u;", $type, $this->id);
-			if ($result = $this->db->query($qry))
+			$qry = "UPDATE users SET usertype = :type WHERE userid = :userid";
+			$stmt = $this->db->prepare($qry);
+			if ($stmt->execute(array(':type' => $type, ':userid' => $this->id)))
 			{
 				$this->type = $type;
 				return TRUE;
@@ -368,17 +373,21 @@ class RPC_User
 		// need to be manually deleted along with administrator assignments
 		if ($this->is_administrator || $this->is_publisher)
 		{
-			$qry_assign = sprintf("DELETE FROM assignments WHERE userid=%u AND template=0;", $this->id);
+			$qry_assign = "DELETE FROM assignments WHERE userid = :userid AND template = 0";
 		}
 		else
 		{
-			$qry_assign = sprintf("DELETE FROM assignments WHERE userid=%u;", $this->id);
+			$qry_assign = "DELETE FROM assignments WHERE userid = :userid";
 		}
-		$result_assign = $this->db->query($qry_assign);
+		$stmt = $this->db->prepare($qry_assign);
+		$result_assign = $stmt->execute(array(':userid' => $this->id));
+		$stmt = NULL;
 
 
-		$qry_user = sprintf("DELETE FROM users WHERE userid=%u;", $this->id);
-		$result_user = $this->db->query($qry_user);
+		$qry_user = "DELETE FROM users WHERE userid = :userid";
+		$stmt = $this->db->prepare($qry_user);
+		$result_user = $stmt->execute(array(':userid' => $this->id));
+		$stmt = NULL;
 
 		if ($result_user && $result_assign)
 		{
@@ -422,7 +431,7 @@ class RPC_User
 				$qry_order = "DESC";
 				break;
 		}
-		$qry = sprintf(<<<QRY
+		$qry = <<<QRY
 			SELECT * FROM
 			(
 				SELECT
@@ -436,7 +445,7 @@ class RPC_User
 					days_left,
 					is_shared
 				FROM assignments_brief_vw
-				WHERE userid=%1\$u AND status='%2\$s'
+				WHERE userid = :userid AND status = :status
 				UNION
 				SELECT
 					linkid,
@@ -449,14 +458,16 @@ class RPC_User
 					days_left,
 					is_shared
 				FROM linked_assignments JOIN assignments_brief_vw ON linked_assignments.assignid = assignments_brief_vw.id
-				WHERE linked_assignments.userid=%1\$u AND assignments_brief_vw.status='%2\$s'
+				WHERE linked_assignments.userid = :userid_union AND assignments_brief_vw.status = :status_union
 			) sub
-			ORDER BY due_date %3\$s, title ASC;
-QRY
-		, $this->id, $qry_status, $qry_order);
-		if ($result = $this->db->query($qry))
+			ORDER BY due_date $qry_order, title ASC;
+QRY;
+
+		$stmt = $this->db->prepare($qry);
+		$params = array(':userid' => $this->id, ':status' => $qry_status, ':userid_union' => $this->id, ':status_union' => $qry_status);
+		if ($stmt->execute($params))
 		{
-			$rows = $result->fetchAll();
+			$rows = $stmt->fetchAll();
 			foreach ($rows as $row)
 			{
 				// Build URLs
@@ -474,7 +485,7 @@ QRY
 				}
 				$arr_assignments[] = $row;
 			}
-			$result->closeCursor();
+			$stmt->closeCursor();
 			return $arr_assignments;
 		}
 		else
@@ -500,7 +511,7 @@ QRY
 			$this->error = self::ERR_INVALID_INPUT;
 			return FALSE;
 		}
-		$qry = sprintf(<<<QRY
+		$qry = <<<QRY
 			SELECT * FROM
 			(
 				SELECT
@@ -512,7 +523,7 @@ QRY
 					due_date,
 					days_left
 				FROM steps_vw
-				WHERE userid=%1\$u AND days_left >= -%2\$u AND days_left <= %2\$u
+				WHERE userid = :userid AND ABS(days_left) <= :days_left
 				UNION
 				SELECT
 					linked_steps_vw.linkid,
@@ -525,14 +536,15 @@ QRY
 				FROM linked_steps_vw
 					JOIN steps_vw ON linked_steps_vw.id = steps_vw.id
 					JOIN linked_assignments ON linked_steps_vw.linkid = linked_assignments.linkid
-				WHERE linked_assignments.userid=%1\$u AND days_left >=-%2\$u AND days_left <= %2\$u
+				WHERE linked_assignments.userid = :userid_union AND ABS(days_left) <= :days_left_union
 			) sub
 			ORDER BY days_left ASC, step ASC;
-QRY
-		, $this->id, $days);
-		if ($result = $this->db->query($qry))
+QRY;
+		$stmt= $this->db->prepare($qry);
+		$params = array(':userid' => $this->id, ':days_left' => $days, ':userid_union' => $this->id, ':days_left_union' => $days);
+		if ($stmt->execute($params))
 		{
-			$rows = $result->fetchAll();
+			$rows = $stmt->fetchAll();
 			foreach ($rows as $row)
 			{
 				// Build URLs
@@ -550,7 +562,7 @@ QRY
 				}
 				$arr_items_due[] = $row;
 			}
-			$result->closeCursor();
+			$stmt->closeCursor();
 			return $arr_items_due;
 		}
 		else
@@ -588,6 +600,8 @@ QRY
 				is_published
 			FROM templates_vw 
 QRY;
+		$params = array();
+
 		if ($user->is_administrator)
 		{
 			// No where needed - all templates selected
@@ -595,17 +609,19 @@ QRY;
 		}
 		else if ($user->is_publisher)
 		{
-			$qry_where = sprintf("WHERE userid = %u OR is_published = 1;", $user->id);
+			$qry_where = "WHERE userid = :userid OR is_published = 1";
+			$params[':userid'] = $user->id;
 		}
 		else  // Regular user
 		{
-			$qry_where = "WHERE is_published = 1;";
+			$qry_where = "WHERE is_published = 1";
 		}
 
-		if($result = $user->db->query($qry_sel . $qry_where))
+		$stmt = $user->db->prepare($qry_sel . $qry_where);
+		if ($stmt->execute($params))
 		{
 			$arr_templates = array();
-			$rows = $result->fetchAll();
+			$rows = $stmt->fetchAll();
 			foreach ($rows as $row)
 			{
 				// Add edit permissions to each row
@@ -630,7 +646,7 @@ QRY;
 				$row['url_delete'] = $user->config->app_use_url_rewrite ? $row['url'] . "/delete" : $row['url'] . "&action=delete";
 				$arr_templates[] = $row;
 			}
-			$result->closeCursor();
+			$stmt->closeCursor();
 		}
 		else
 		{
@@ -662,7 +678,7 @@ QRY;
 		}
 		else
 		{
-			$this->active_authority_user = $active_authority_user;
+			self::$active_authority_user = $active_authority_user;
 			return TRUE;
 		}
 	}
@@ -678,7 +694,7 @@ QRY;
 	{
 		// Error if authority user isn't set or doesn't have administrator privileges
 		// Except if the current user is an auth_superuser defined in config.inc.php
-		if ((!isset($this->active_authority_user) || (isset($this->active_authority_user) && !$this->active_authority_user->is_administrator)) && !in_array($this->username, $this->config->auth_superusers))
+		if ((!isset(self::$active_authority_user) || (isset(self::$active_authority_user) && !self::$active_authority_user->is_administrator)) && !in_array($this->username, $this->config->auth_superusers))
 		{
 			$this->error = self::ERR_ACCESS_DENIED;
 			return FALSE;
@@ -690,8 +706,12 @@ QRY;
 		}
 		// Update database
 		$this->raw_perms_int = $permission;
-		$qry = sprintf("UPDATE users SET perms = %u WHERE userid = %u;", $this->raw_perms_int, $this->id);
-		if ($result = $this->db->query($qry))
+
+		$qry = "UPDATE users SET perms = :perms WHERE userid = :userid";
+		$stmt = $this->db->prepare($qry);
+		$stmt->bindValue(':perms', $this->raw_perms_int, \PDO::PARAM_INT);
+		$stmt->bindValue(':userid', $this->id, \PDO::PARAM_INT);
+		if ($stmt->execute())
 		{
 			// Set the permission boolean flags
 			switch ($permission)
@@ -730,15 +750,19 @@ QRY;
 	{
 		// Error if authority user isn't set or doesn't have administrator privileges
 		// Except if the current user is an auth_superuser defined in config.inc.php
-		if ((!isset($this->active_authority_user) || (isset($this->active_authority_user) && !$this->active_authority_user->is_administrator)) && !$this->username == $this->config->auth_superusers)
+		if ((!isset(self::$active_authority_user) || (isset(self::$active_authority_user) && !self::$active_authority_user->is_administrator)) && !$this->username == $this->config->auth_superusers)
 		{
 			$this->error = self::ERR_ACCESS_DENIED;
 			return FALSE;
 		}
 		// Update database
 		$this->raw_perms_int = self::RPC_AUTHLEVEL_USER;
-		$qry = sprintf("UPDATE users SET perms = %u WHERE userid = %u;", $this->raw_perms_int, $this->id);
-		if ($result = $this->db->query($qry))
+
+		$qry = "UPDATE users SET perms = :perms WHERE userid = :userid";
+		$stmt = $this->db->prepare($qry);
+		$stmt->bindValue(':perms', $this->raw_perms_int, \PDO::PARAM_INT);
+		$stmt->bindValue(':userid', $this->id, \PDO::PARAM_INT);
+		if ($stmt->execute())
 		{
 			// Set the permission boolean flags
 			$this->is_publisher = FALSE;
@@ -814,16 +838,17 @@ QRY;
 		// Can't create a user who already exists (username or email)
 		if (!RPC_User::username_exists($username, $db) && !RPC_User::email_exists($email, $db))
 		{
-			$qry = sprintf("INSERT INTO users (username, name, email, usertype, perms) VALUES ('%s','%s','%s','%s',%u);",
-						$db->real_escape_string(substr($username,0,320)),
-						$db->real_escape_string(substr($name,0,256)),
-						$db->real_escape_string(strtolower($email)),
-						$type,
-						$perms
-			);
-			if ($result = $db->query($qry))
+			$qry = "INSERT INTO users (username, name, email, usertype, perms) VALUES (:username, :name, :email, :type, :perms)";
+			$stmt = $db->prepare($qry);
+			$stmt->bindValue(':username', substr($username, 0, 255), \PDO::PARAM_STR);
+			$stmt->bindValue(':name', substr($name, 0, 255), \PDO::PARAM_STR);
+			$stmt->bindValue(':email', strtolower($email), \PDO::PARAM_STR);
+			$stmt->bindValue(':type', $type, \PDO::PARAM_STR);
+			$stmt->bindValue(':perms', $perms, \PDO::PARAM_INT);
+
+			if ($stmt->execute())
 			{
-				return $db->insert_id;
+				return $db->lastInsertId();
 			}
 			else
 			{
@@ -844,19 +869,19 @@ QRY;
 	 */
 	public static function username_exists($username, $db)
 	{
-		$username = $db->real_escape_string(strtoupper($username));
-		$qry = sprintf("SELECT username FROM users WHERE UPPER(username) = '%s';", $username);
-		if ($result = $db->query($qry))
+		$qry = "SELECT username FROM users WHERE UPPER(username) = UPPER(:username)";
+		$stmt = $db->prepare($qry);
+		if ($stmt->execute(array(':username' => $username)))
 		{
 			// User exists, return TRUE
-			if ($result->num_rows > 0)
+			if ($stmt->fetch())
 			{
-				$result->closeCursor();
+				$stmt->closeCursor();
 				return self::RPC_EXISTS;
 			}
 			else
 			{
-				$result->closeCursor();
+				$stmt->closeCursor();
 				return self::RPC_NOT_EXISTS;
 			}
 		}
@@ -874,19 +899,19 @@ QRY;
 	 */
 	public static function email_exists($email, $db)
 	{
-		$email = $db->real_escape_string(strtoupper($email));
-		$qry = sprintf("SELECT email FROM users WHERE UPPER(email) = '%s';", $email);
-		if ($result = $db->query($qry))
+		$qry = "SELECT email FROM users WHERE UPPER(email) = UPPER(:email)";
+		$stmt = $db->prepare($qry);
+		if ($stmt->execute(array(':email' => $email)))
 		{
 			// User exists, return TRUE
-			if ($result->num_rows > 0)
+			if ($stmt->fetch())
 			{
-				$result->closeCursor();
+				$stmt->closeCursor();
 				return self::RPC_EXISTS;
 			}
 			else
 			{
-				$result->closeCursor();
+				$stmt->closeCursor();
 				return self::RPC_NOT_EXISTS;
 			}
 		}
