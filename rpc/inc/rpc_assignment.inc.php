@@ -720,18 +720,29 @@ QRY;
 		// Store for user when set
 		if ($user)
 		{
-			$db->beginTransaction();
+			$in_local_trans = FALSE;
+			if (!$db->inTransaction())
+			{
+				$db->beginTransaction();
+				$in_local_trans = TRUE;
+			}
 			$assignment->_store($user);
 			// On successful store(), reload the whole object so permissions get set
 			if (empty($assignment->error))
 			{
 				$stored = TRUE;
-				$db->commit();
+				if ($in_local_trans)
+				{
+					$db->commit();
+				}
 				$assignment = new self($assignment->id, $user, $config, $db);
 			}
 			else
 			{
-				$db->rollBack();
+				if ($in_local_trans)
+				{
+					$db->rollBack();
+				}
 				return $assignment;
 			}
 
@@ -876,7 +887,12 @@ QRY;
 			$new_assign = self::create_blank($user, $orig_assignment->title . $title_append, $orig_assignment->class, $orig_assignment->start_date, $orig_assignment->due_date, FALSE, $config, $db);
 			if (empty($new_assign->error))
 			{
-				$db->beginTransaction();
+				$in_local_trans = FALSE;
+				if (!$db->inTransaction())
+				{
+					$db->beginTransaction();
+					$in_local_trans = TRUE;
+				}
 				// Set the new assignment's parent
 				$new_assign->parent = $orig_assignment->id;
 				// Duplicate all the original steps into the new assignment
@@ -894,11 +910,17 @@ QRY;
 				$new_assign->ancestral_template = $orig_assignment->ancestral_template;
 				if ($new_assign->update())
 				{
-					$db->commit();
+					if ($in_local_trans)
+					{
+						$db->commit();
+					}
 				}
 				else
 				{
-					$db->rollBack();
+					if ($in_local_trans)
+					{
+						$db->rollBack();
+					}
 				}
 			}
 			// May be in error state
