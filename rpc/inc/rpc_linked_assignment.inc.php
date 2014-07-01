@@ -249,8 +249,8 @@ class RPC_Linked_Assignment
 			$rows = $stmt->fetchAll();
 			foreach ($rows as $row)
 			{
-				$this->steps[$row['id']]->annotation = $row['annotation'];
-				$this->steps[$row['id']]->reminder_sent_date = $row['reminder_sent_date'];
+				$this->assignment->steps[$row['id']]->annotation = $row['annotation'];
+				$this->assignment->steps[$row['id']]->reminder_sent_date = $row['reminder_sent_date'];
 			}
 			$stmt->closeCursor();
 		}
@@ -281,6 +281,11 @@ class RPC_Linked_Assignment
 	 */
 	public function update()
 	{
+		if (!$this->is_editable)
+		{
+			$this->error = self::ERR_ACCESS_DENIED;
+			return FALSE;
+		}
 		$this->sanitize();
 		if (!$this->_is_sanitized)
 		{
@@ -301,6 +306,11 @@ class RPC_Linked_Assignment
 	}
 	public function update_step($stepid)
 	{
+		if (!$this->is_editable)
+		{
+			$this->error = self::ERR_ACCESS_DENIED;
+			return FALSE;
+		}
 		if (!array_key_exists($stepid, $this->assignment->steps))
 		{
 			$this->error = self::ERR_NO_SUCH_STEP;
@@ -308,14 +318,14 @@ class RPC_Linked_Assignment
 		}
 		if (!$this->sanitize_step($stepid)) return FALSE;
 
-		if (!array_key_exists($stepid, $this->steps))
+		if (!array_key_exists($stepid, $this->assignment->steps))
 		{
 			$this->error = self::ERR_NO_SUCH_STEP;
 			return FALSE;
 		}
 		$qry = "UPDATE linked_steps SET annotation = :annotation WHERE linkid = :linkid AND stepid = :stepid";
 		$stmt = $this->db->prepare($qry);
-		if ($stmt->execute(array(':annotation' => $this->steps[$stepid]->annotation, ':linkid' => $this->id, ':stepid' => $stepid)))
+		if ($stmt->execute(array(':annotation' => $this->assignment->steps[$stepid]->annotation, ':linkid' => $this->id, ':stepid' => $stepid)))
 		{
 			return TRUE;
 		}
@@ -339,8 +349,7 @@ class RPC_Linked_Assignment
 	}
 	public function sanitize_step($stepid)
 	{
-		$this->steps[$stepid]->annotation = RPC_Step::step_strip_tags($this->steps[$stepid]->annotation);
-		$this->steps[$stepid]->annotation = trim($this->steps[$stepid]->annotation);
+		$this->assignment->steps[$stepid]->annotation = trim(RPC_Step::step_strip_tags($this->assignment->steps[$stepid]->annotation));
 		return TRUE;
 	}
 	/**

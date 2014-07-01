@@ -1274,7 +1274,7 @@ RPCStep.prototype.updateDescription = function(newValue, mode) {
 			actionDesc = "annotation";
 			// If the parent is a linked assignment,
 			// use RPC_Linked_Assignment::ACTION_SET_LINKED_STEP_ANNOTATION (31)
-			if (this.parentAssignment.type == "link") {
+			if (this.parentAssignment.objectType == "link") {
 				this.form.action.value = 31;
 			}
 			else {
@@ -1282,9 +1282,24 @@ RPCStep.prototype.updateDescription = function(newValue, mode) {
 			}
 			break;
 	}
-	this.form.val_1.value = newValue;
-	// Pass the stepId when handling a linked step annotation
-	this.form.val_2.value = this.form.action.value == 31 ? this.stepId : "";
+	if (this.parentAssignment.objectType == "link") {
+		// Linked step annotations (action 31) are processed by handlers/assignment.php
+		// while anything else is in step.php, so in that case we need to switch
+		// over and then back after the call
+		this.xhrArgs.form = dojo.byId('frm-assign-handler');
+		this.xhrArgs.form.transid.value = this.parentAssignment.transId;
+		this.xhrArgs.form.action.value = 31;
+		// Send assignment as id
+		this.xhrArgs.form.id.value = this.parentAssignment.id;
+		// Send stepId|value as newValue
+		this.xhrArgs.form.val.value = this.stepId + '|' + newValue;
+	}
+	else {
+		this.form.val_1.value = newValue;
+		// Pass the stepId when handling a linked step annotation
+		// this.form.val_2.value = this.form.action.value == 31 ? this.stepId : "";
+		this.form.val_2.value = "";
+	}
 	var tmp_this = this;
 	this.xhrArgs.load = function(response, ioArgs) {
 		var aResp = response.split('|');
@@ -1303,12 +1318,6 @@ RPCStep.prototype.updateDescription = function(newValue, mode) {
 		}
 		return response;
 	};
-	// Linked step annotations (action 31) are processed by handlers/assignment.php
-	// while anything else is in step.php, so in that case we need to switch
-	// over and then back after the call
-	if (this.form.action.value == 31) {
-		this.xhrArgs.form = dojo.byId('frm-assign-handler');
-	}
 	var deferred = dojo.xhrPost(this.xhrArgs);
 
 	// Reset the form target to the default for steps

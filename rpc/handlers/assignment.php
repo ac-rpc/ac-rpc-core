@@ -153,12 +153,12 @@ else
 					if (!empty($rpc_error)) $rpc_return_assign = $active_obj->url;
 					break;
 				case RPC_Linked_Assignment::ACTION_SET_LINKED_STEP_ANNOTATION:
-					// val_2 has to be a valid stepid within $active_obj->assignment
-					if (ctype_digit(strval($_POST['val_2'])) && array_key_exists($_POST['val_2'], $active_obj->assignment->steps))
+					// Pipe-delimited stepId|annotation body
+					$annotation_params = explode("|", $rpc_post['val'], 2);
+					if (ctype_digit(strval($annotation_params[0])) && array_key_exists($annotation_params[0], $active_obj->assignment->steps))
 					{
-						// val_2 might be empty.
-						$active_obj->assignment->steps[$_POST['val_1']]->annotation = $_POST['val_1'];
-						$active_obj->update_step($_POST['val_2']);
+						$active_obj->assignment->steps[$annotation_params[0]]->annotation = trim($annotation_params[1]);
+						$active_obj->update_step($annotation_params[0]);
 					}
 					else
 					{
