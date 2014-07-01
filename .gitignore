@@ -1,2 +1,7 @@
 .svn
 *~
+
+/vendor/
+rpc/tmpl/cache
+rpc/tmpl/compile
+rpc/inc/config.inc.php
