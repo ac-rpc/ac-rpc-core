@@ -83,8 +83,9 @@ class RPC_Step extends RPC_Step_Base
 				annotation,
 				position,
 				reminderdate,
+				remindersentdate,
 				percent
-			) VALUES (:assignid, :title, :description, :teacher_description, :annotation, :position, FROM_UNIXTIME(:due_date), :percent);";
+			) VALUES (:assignid, :title, :description, :teacher_description, :annotation, :position, FROM_UNIXTIME(:due_date), NULL, :percent);";
 	/**
 	 * Query skeleton for database UPDATE
 	 */
@@ -178,7 +179,7 @@ QRY;
 						$this->due_date = intval($row['due_date']);
 						$this->days_left = intval($row['days_left']);
 						// Reminder sent only applies to owning user.
-						$this->reminder_sent_date = $this->author == $user->id ?intval($row['reminder_sent_date']) : NULL;
+						$this->reminder_sent_date = $this->author == $user->id && !empty($row['reminder_sent_date']) ? intval($row['reminder_sent_date']) : NULL;
 						$this->percent = intval($row['percent']);
 					}
 				}
@@ -356,7 +357,7 @@ QRY;
 			$stmt->bindValue(':teacher_description', $this->teacher_description, \PDO::PARAM_STR);
 			$stmt->bindValue(':annotation', $this->annotation, \PDO::PARAM_STR);
 			$stmt->bindValue(':position', $this->position, \PDO::PARAM_INT);
-			$stmt->bindValue(':due_date', ($due_date === NULL ? $this->due_date : $due_date), \PDO::PARAM_STR);
+			$stmt->bindValue(':due_date', ($due_date === NULL ? $this->due_date : $due_date), \PDO::PARAM_INT);
 			$stmt->bindValue(':percent', $this->percent, \PDO::PARAM_INT);
 
 			if ($stmt->execute())
@@ -433,8 +434,8 @@ QRY;
 		$stmt->bindValue(':description', $this->description, \PDO::PARAM_STR);
 		$stmt->bindValue(':teacher_description', $this->teacher_description, \PDO::PARAM_STR);
 		$stmt->bindValue(':annotation', $this->annotation, \PDO::PARAM_STR);
-		$stmt->bindValue(':due_date', $this->due_date, \PDO::PARAM_STR);
-		$stmt->bindValue(':reminder_sent_date', $this->reminder_sent_date, \PDO::PARAM_STR);
+		$stmt->bindValue(':due_date', $this->due_date, \PDO::PARAM_INT);
+		$stmt->bindValue(':reminder_sent_date', $this->reminder_sent_date, \PDO::PARAM_INT);
 		$stmt->bindValue(':percent', $this->percent, \PDO::PARAM_INT);
 		$stmt->bindValue(':stepid', $this->id, \PDO::PARAM_INT);
 
@@ -529,7 +530,7 @@ QRY;
 			$stmt->bindValue(':teacher_description', $teacher_description, \PDO::PARAM_STR);
 			$stmt->bindValue(':annotation', $annotation, \PDO::PARAM_STR);
 			$stmt->bindValue(':position', $position, \PDO::PARAM_INT);
-			$stmt->bindValue(':due_date', $due_date, \PDO::PARAM_STR);
+			$stmt->bindValue(':due_date', $due_date, \PDO::PARAM_INT);
 			$stmt->bindValue(':percent', $percent, \PDO::PARAM_INT);
 
 			if ($stmt->execute())
