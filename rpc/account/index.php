@@ -141,13 +141,20 @@ switch ($account_action)
 				$smarty->assign('transid', $_SESSION['transid']);
 				$form = 'forms/native_resetpw.tpl';
 			}
+
+			// No caching for form displays.
+			$_SESSION['transid'] = md5(time() . rand());
+			$smarty->assign('transid', $_SESSION['transid']);
+			header('Cache-control: private');
+			header('Pragma: no-cache');
+			$smarty->skin_display($form);
 		}
-		// No caching for form displays.
-		$_SESSION['transid'] = md5(time() . rand());
-		$smarty->assign('transid', $_SESSION['transid']);
-		header('Cache-control: private');
-		header('Pragma: no-cache');
-		$smarty->skin_display($form);
+		else
+		{
+			$_SESSION['general_error'] = "Invalid action";
+			header("Location: " . $config->app_fixed_web_path);
+			exit();
+		}
 		break;
 
 	/************************  NEW ACCOUNT CREATION *****************************/
@@ -268,6 +275,12 @@ switch ($account_action)
 			header('Cache-control: private');
 			header('Pragma: no-cache');
 			$smarty->skin_display('forms/native_newacct.tpl');
+			exit();
+		}
+		else
+		{
+			$_SESSION['general_error'] = "Invalid action";
+			header("Location: " . $config->app_fixed_web_path);
 			exit();
 		}
 		break;
