@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit backupGlobals="false"
+         backupStaticAttributes="false"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         processIsolation="false"
+         stopOnFailure="false"
+         syntaxCheck="false"
+         bootstrap="test/bootstrap.php">
+    <testsuites>
+        <testsuite name="ac-rpc-core test suite">
+            <directory>./test/</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory>./</directory>
+            <exclude>
+                <directory>./vendor</directory>
+                <directory>./test</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+
+    <php>
+        <var name="PHPUNIT_DB_DSN" value="mysql:host=localhost;dbname=acrpc_test" />
+        <var name="PHPUNIT_DB_HOST" value="localhost" />
+        <var name="PHPUNIT_DB_USER" value="mjb" />
+        <var name="PHPUNIT_DB_PASS" value="" />
+        <!-- If you change PHPUNIT_DB_NAME you must also change it in usertrack_test.sql -->
+        <var name="PHPUNIT_DB_NAME" value="acrpc_test" />
+    </php>
+</phpunit>
