@@ -236,10 +236,11 @@ class RPC_Config
 	 * loads into local object, initializes all other config
 	 * values then discards $GLOBALS['CONF']
 	 *
+	 * @param string $filename Alternate config filename
 	 * @access private
 	 * @return object RPC_Config
 	 */
-	private function __construct()
+	private function __construct($filename = NULL)
 	{
 		// Initialize config array before reading its values...
 		if (!isset($GLOBALS['CONF']))
@@ -247,7 +248,15 @@ class RPC_Config
 			$GLOBALS['CONF'] = array();
 		}
 		global $CONF;
-		require_once(__DIR__ . '/config.inc.php');
+		// Load file if specified, otherwise default
+		if (!empty($filename))
+		{
+			require_once(realpath($filename));
+		}
+		else
+		{
+			require_once(__DIR__ . '/config.inc.php');
+		}
 
 		// Config file was found, but had nothing useful
 		if (sizeof($GLOBALS['CONF']) == 0)
@@ -409,14 +418,15 @@ class RPC_Config
 	/**
 	 * Singleton accessor method
 	 *
+	 * @param string $filename Alternate config filename
 	 * @access public
 	 * @return object RPC_Config Global configuration singleton
 	 */
-	public static function get_instance()
+	public static function get_instance($filename = NULL)
 	{
 		if (self::$_instance == NULL)
 		{
-			self::$_instance = new self();
+			self::$_instance = new self($filename);
 		}
 		return self::$_instance;
 	}
