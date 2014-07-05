@@ -43,8 +43,48 @@ assignments:
     remind: 1
     shared: 0
     template: 0
+    published: 0
   -
     assignid: 2
+    userid: 1
+    title: User 1 Assignment 2 Expired
+    description:
+    class: Science
+    createdate: "2010-07-01 08:00:00"
+    startdate: "2010-08-01 09:00:00"
+    duedate: "2010-09-01 23:59:59"
+    remind: 0
+    shared: 1
+    template: 0
+    published: 0
+  -
+    assignid: 3
+    userid: 1
+    title: User 1 Assignment 3 Inactive
+    description:
+    class: Science
+    createdate: "2010-07-01 08:00:00"
+    startdate:
+    duedate:
+    remind: 0
+    shared: 0
+    template: 0
+    published: 0
+  -
+    assignid: 4
+    userid: 1
+    title: User 1 Assignment 3 Active
+    description:
+    class: Science
+    createdate: "2014-07-01 08:00:00"
+    startdate: "2014-08-01 09:00:00"
+    duedate: "2014-09-01 23:59:59"
+    remind: 0
+    shared: 1
+    template: 0
+    published: 0
+  -
+    assignid: 5
     userid: 1
     title: User 1 Template 1
     description:
@@ -55,8 +95,9 @@ assignments:
     remind: 0
     shared: 1
     template: 1
+    published: 1
   -
-    assignid: 3
+    assignid: 6
     userid: 2
     title: User 2 Assignment 1
     description:
@@ -67,7 +108,21 @@ assignments:
     remind: 0
     shared: 0
     template: 0
+    published: 0
     ancestraltemplate: 2
+  -
+    assignid: 7
+    userid: 1
+    title: User 1 Template 2 Unpublished
+    description:
+    class: 
+    createdate: "2014-07-01 08:00:00"
+    startdate:
+    duedate: 
+    remind: 0
+    shared: 1
+    template: 1
+    published: 0
 
 steps:
   -
