@@ -445,7 +445,9 @@ class RPC_User
 					days_left,
 					is_shared
 				FROM assignments_brief_vw
-				WHERE userid = :userid AND status = :status
+				WHERE
+					userid = :userid
+					AND (status = :status OR :status_const = 'ALL')
 				UNION
 				SELECT
 					linkid,
@@ -458,13 +460,22 @@ class RPC_User
 					days_left,
 					is_shared
 				FROM linked_assignments JOIN assignments_brief_vw ON linked_assignments.assignid = assignments_brief_vw.id
-				WHERE linked_assignments.userid = :userid_union AND assignments_brief_vw.status = :status_union
+				WHERE
+					linked_assignments.userid = :userid_union 
+					AND (assignments_brief_vw.status = :status_union OR :status_union_const = 'ALL')
 			) sub
 			ORDER BY due_date $qry_order, title ASC;
 QRY;
 
 		$stmt = $this->db->prepare($qry);
-		$params = array(':userid' => $this->id, ':status' => $qry_status, ':userid_union' => $this->id, ':status_union' => $qry_status);
+		$params = array(
+			':userid' => $this->id,
+			':status' => $qry_status,
+			':status_const' => $qry_status,
+			':userid_union' => $this->id,
+			':status_union' => $qry_status,
+			':status_union_const' => $qry_status
+		);
 		if ($stmt->execute($params))
 		{
 			$rows = $stmt->fetchAll();

@@ -25,6 +25,6 @@ class RpcTest extends RPC_PHPUnit_Extensions_Databaase_TestCase
 		$this->assertEquals(1, count(RPC_User::get_templates($user)));
 
 		// Should have 2 assignments
-		$this->assertEquals(2, count($user->get_assignments()));
+		$this->assertEquals(1, count($user->get_assignments()));
 	}
 }
