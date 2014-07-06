@@ -273,7 +273,7 @@ abstract class RPC_Step_Base
 	 * @access private
 	 * @return string
 	 */
-	private static function step_strip_tag_attributes($string)
+	protected static function step_strip_tag_attributes($string)
 	{
 		$arr_disallowed_attrs = array(
 			"javascript",

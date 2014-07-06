@@ -676,12 +676,17 @@ QRY;
 	 * currently has any error status
 	 * Note: This database action does NOT get committed until $this->db->commit() is called!
 	 * 
-	 * @param object $active_authority_user RPC_User
+	 * @param object $active_authority_user RPC_User If NULL, unsets the authority user
 	 * @access public
 	 * @return boolean
 	 */
 	public function set_active_authority_user($active_authority_user)
 	{
+		if (!$active_authority_user)
+		{
+			self::$active_authority_user = NULL;
+			return TRUE;
+		}
 		if ($active_authority_user->id == $this->id || !empty($active_authority_user->error))
 		{
 			$this->error = self::ERR_CANNOT_SET_AUTHORITY;
