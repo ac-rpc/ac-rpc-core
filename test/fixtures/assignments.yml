@@ -28,7 +28,7 @@ assignments:
   -
     assignid: 3
     userid: 1
-    title: User 1 Assignment 3 Inactive
+    title: User 1 Assignment 3 Inactive Unshared
     description:
     class: Science
     createdate: "2010-07-01 08:00:00"
@@ -41,7 +41,7 @@ assignments:
   -
     assignid: 4
     userid: 1
-    title: User 1 Assignment 3 Active
+    title: User 1 Assignment 3 Active Shared
     description:
     class: Science
     createdate: "2014-07-01 08:00:00"
