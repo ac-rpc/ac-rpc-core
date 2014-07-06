@@ -1,0 +1,31 @@
+users:
+  -
+    userid: 1
+    username: testuser1@localhost.localdomain
+    email: testuser1@localhost.localdomain
+    name: Test User 1
+    # "abc123"
+    password: 0ca931241a6c146fa83d33f3a4d476d9b49c4013
+    passwordsalt: salt
+    usertype: TEACHER
+    perms: 4
+  -
+    userid: 2
+    username: testuser2@example.com
+    email: testuser2@example.com
+    name: Test User Two
+    # "123abc"
+    password: 3a71225d5948cb54f09fc4a37560f76190d03328
+    passwordsalt: salt
+    usertype: STUDENT
+    perms: 1
+  -
+    userid: 3
+    username: user3@example.com
+    email: user3@example.com
+    name:
+    # Pass: "abc123" bcrypt cost 12
+    password: $2y$12$VfrngktsRxc//yr4O7E8t.kk30PgWliQgnFRGj8w2MfuMo97B9y0y
+    passwordsalt: BCRYPT-UNUSED
+    usertype: STUDENT
+    perms: 1

@@ -1,10 +1,14 @@
 <?php
 abstract class RPC_PHPUnit_Extensions_Databaase_TestCase extends PHPUnit_Extensions_Database_TestCase
 {
-  public $fixture_path;
+	public $fixture_path;
 	static private $pdo = null;
 	protected $conn = null;
 
+	protected function getDataSet()
+	{
+		$this->fixture_path = realpath(__DIR__ . '/../fixtures');
+	}
 	public function getConnection()
 	{
 		if ($this->conn === null) {
@@ -17,8 +21,6 @@ abstract class RPC_PHPUnit_Extensions_Databaase_TestCase extends PHPUnit_Extensi
 	}
 	public function getSetUpOperation()
 	{
-		$this->fixture_path = __DIR__ . '/../fixtures/';
-
 		$cascadeTruncates = TRUE; //if you want cascading truncates, false otherwise
 		//if unsure choose false
 
