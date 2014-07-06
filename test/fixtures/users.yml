@@ -29,3 +29,14 @@ users:
     passwordsalt: BCRYPT-UNUSED
     usertype: STUDENT
     perms: 1
+  -
+    # Alternate administrator
+    userid: 4
+    username: user4@example.com
+    email: user4@example.com
+    name:
+    # Pass: "abc123" bcrypt cost 12
+    password: $2y$12$VfrngktsRxc//yr4O7E8t.kk30PgWliQgnFRGj8w2MfuMo97B9y0y
+    passwordsalt: BCRYPT-UNUSED
+    usertype: TEACHER
+    perms: 4

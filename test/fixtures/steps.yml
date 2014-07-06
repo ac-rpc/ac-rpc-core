@@ -33,4 +33,12 @@ steps:
     teacher_description: <h1>The Teacher Description<h1><p>A description here</p>
     reminderdate: 
     percent: 80
-
+  - 
+    stepid: 5
+    assignid: 6
+    position: 1
+    title: User 2 Assignment 1 Step 1
+    description:
+    teacher_description:
+    reminderdate:
+    percent:
