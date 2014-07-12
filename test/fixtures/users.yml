@@ -7,6 +7,7 @@ users:
     # "abc123"
     password: 0ca931241a6c146fa83d33f3a4d476d9b49c4013
     passwordsalt: salt
+    hashtype: sha1
     usertype: TEACHER
     perms: 4
   -
@@ -17,6 +18,7 @@ users:
     # "123abc"
     password: 3a71225d5948cb54f09fc4a37560f76190d03328
     passwordsalt: salt
+    hashtype: sha1
     usertype: STUDENT
     perms: 1
   -
@@ -27,6 +29,7 @@ users:
     # Pass: "abc123" bcrypt cost 12
     password: $2y$12$VfrngktsRxc//yr4O7E8t.kk30PgWliQgnFRGj8w2MfuMo97B9y0y
     passwordsalt: BCRYPT-UNUSED
+    hashtype: bcrypt
     usertype: STUDENT
     perms: 1
   -
@@ -38,5 +41,6 @@ users:
     # Pass: "abc123" bcrypt cost 12
     password: $2y$12$VfrngktsRxc//yr4O7E8t.kk30PgWliQgnFRGj8w2MfuMo97B9y0y
     passwordsalt: BCRYPT-UNUSED
+    hashtype: bcrypt
     usertype: TEACHER
     perms: 4

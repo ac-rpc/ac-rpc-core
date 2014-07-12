@@ -200,7 +200,7 @@ class Native_User extends RPC_User
 		if ($this->hashtype == 'sha1')
 		{
 			$stmt = $this->db->prepare("SELECT 1 FROM users WHERE username = :username AND password = :password LIMIT 1");
-			if ($stmt->execute(array(':username' => $this->username, ':password' => sha1($password, $this->salt))))
+			if ($stmt->execute(array(':username' => $this->username, ':password' => sha1($password . $this->salt))))
 			{
 				if ($row = $stmt->fetch())
 				{
@@ -264,6 +264,26 @@ class Native_User extends RPC_User
 			return TRUE;
 		}
 		return FALSE;
+	}
+	/**
+	 * Return the current hashtype
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	public function get_hashtype()
+	{
+		return $this->hashtype;
+	}
+	/**
+	 * Return the current legacy salt
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	public function get_salt()
+	{
+		return $this->salt;
 	}
 	/**
 	 * Set the user's status to authenticated. Also sets username in $_SESSION
