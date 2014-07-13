@@ -125,4 +125,9 @@ class RPC_UserTest extends RPC_PHPUnit_Extensions_Databaase_TestCase
 		$this->assertEquals(0, $this->getConnection()->getRowCount('assignments', 'userid = 2'));
 		$this->assertEquals(0, $this->getConnection()->getRowCount('steps', 'assignid = 6'));
 	}
+	public function testAnonymousUser()
+	{
+		$anon = new RPC_User(RPC_User::RPC_DO_NOT_QUERY, NULL, $this->config, $this->db);
+		$this->assertNull($anon->error);
+	}
 }
