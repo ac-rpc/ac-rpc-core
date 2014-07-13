@@ -72,14 +72,14 @@ class Native_User extends RPC_User
 	public $token;
 	/**
 	 * @var string
-	 * @access private
+	 * @access public
 	 */
-	private $reset_token;
+	public $reset_token;
 	/**
 	 * @var int
-	 * @access private
+	 * @access public
 	 */
-	private $reset_token_expires;
+	public $reset_token_expires;
 	/**
 	 * User has successfully supplied credentials
 	 *
@@ -591,7 +591,7 @@ QRY;
 	 */
 	public function recover_password()
 	{
-		$token = $this->_set_reset_token();
+		$token = $this->set_reset_token();
 		$smarty = new RPC_Smarty($this->config);
 		$smarty->assign('token', $token);
 
@@ -656,10 +656,10 @@ HEADERS;
 	 * Create a new random salt string, used with recovery tokens
 	 * In legacy systems this was used to set a new password for recovery
 	 *
-	 * @access private
+	 * @access public
 	 * @return string
 	 */
-	private function _set_reset_token()
+	public function set_reset_token()
 	{
 		$newpass = '';
 		$arr_pass = array();

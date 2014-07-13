@@ -103,7 +103,31 @@ class RPC_Native_User_Test extends RPC_PHPUnit_Extensions_Databaase_TestCase
 		// Requery & validate
 		$user4 = new Native_User('user4@example.com', $this->config, $this->db);
 		$this->assertTrue($user4->validate_password($forcepass));
+	}
+	public function testSetResetToken()
+	{
+		$user3 = new Native_User('user3@example.com', $this->config, $this->db);
+		$this->assertNull($user3->reset_token);
+		$this->assertNull($user3->reset_token_expires);
 
+		// Set the token,  verify it has an expiry
+		$user3->set_reset_token();
+		$this->assertNotEmpty($user3->reset_token);
+		$this->assertGreaterThan(time(), $user3->reset_token_expires);
+
+		// Attempt to query token
+		$token = $user3->reset_token;
+		$reset_user = Native_User::get_user_by_token($token, $this->config, $this->db);
+		$this->assertEquals('user3@example.com', $reset_user->username);
+	}
+	/**
+	 * @depends testSetResetToken
+	 */
+	public function testExpiredResetToken()
+	{
+		// Set a past expiry
+		$this->db->query("UPDATE users SET reset_token = 'token', reset_token_expires = NOW() - INTERVAL 10 SECOND WHERE userid = 2");
+		$this->assertFalse(Native_User::get_user_by_token('token', $this->config, $this->db));
 	}
 }
 ?>
