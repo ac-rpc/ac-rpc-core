@@ -62,5 +62,48 @@ class RPC_Native_User_Test extends RPC_PHPUnit_Extensions_Databaase_TestCase
 		// And is now loggedin
 		$this->assertTrue($user3->is_authenticated);
 	}
+	public function testPasswordComplexity()
+	{
+		$this->assertFalse(Native_User::password_meets_complexity('sh0rt'));
+		$this->assertFalse(Native_User::password_meets_complexity('long enough no numbers'));
+		// Only numbers
+		$this->assertFalse(Native_User::password_meets_complexity('1234567'));
+		$this->assertTrue(Native_User::password_meets_complexity('long enough with99 number'));
+		$this->assertTrue(Native_User::password_meets_complexity('long enough with number end99'));
+		$this->assertTrue(Native_User::password_meets_complexity('99long enough with number start'));
+	}
+	public function testSetPassword()
+	{
+		$oldpass = 'abc123';
+		$wrongpass = 'wrong';
+		$newpass = 'cba321';
+		$forcepass = 'zyx987';
+		$user4 = new Native_User('user4@example.com', $this->config, $this->db);
+
+		$this->assertTrue($user4->validate_password($oldpass));
+
+		// Wrong old password
+		$this->assertFalse($user4->set_password($wrongpass, $newpass));
+		$this->assertEquals(Native_User::ERR_INCORRECT_CREDS, $user4->error);
+		// Old password still works
+		$this->assertTrue($user4->validate_password($oldpass));
+
+		// Complexity
+		$this->assertFalse($user4->set_password($oldpass, $wrongpass));
+		$this->assertEquals(Native_User::ERR_PASWORD_COMPLEXITY_UNMET, $user4->error);
+
+		// Correctly set
+		$this->assertTrue($user4->set_password($oldpass, $newpass));
+		// Requery
+		$user4 = new Native_User('user4@example.com', $this->config, $this->db);
+		$this->assertTrue($user4->validate_password($newpass));
+
+		// Using the $force option to change without oldpass
+		$this->assertTrue($user4->set_password(NULL, $forcepass, TRUE));
+		// Requery & validate
+		$user4 = new Native_User('user4@example.com', $this->config, $this->db);
+		$this->assertTrue($user4->validate_password($forcepass));
+
+	}
 }
 ?>

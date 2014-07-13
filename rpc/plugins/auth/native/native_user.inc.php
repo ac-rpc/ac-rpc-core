@@ -650,7 +650,7 @@ HEADERS;
 	 */
 	public static function password_meets_complexity($password)
 	{
-		return preg_match('/^.*(?=.{6,})(?=.*\d).*$/', $password);
+		return (bool)preg_match('/^.*(?=.{6,})(?=.*\d)(?=.*[a-z]).*$/i', $password);
 	}
 	/**
 	 * Create a new random salt string, used with recovery tokens
