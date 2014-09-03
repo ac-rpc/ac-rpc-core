@@ -91,3 +91,29 @@ assignments:
     shared: 1
     template: 1
     published: 0
+  -
+    assignid: 8
+    userid: 5
+    title: User 5 Template 1 Unpublished
+    description:
+    class: 
+    createdate: "2014-07-01 08:00:00"
+    startdate:
+    duedate: 
+    remind: 0
+    shared: 1
+    template: 1
+    published: 0
+  -
+    assignid: 9
+    userid: 6
+    title: User 6 Template 1 Unpublished
+    description:
+    class: 
+    createdate: "2014-07-01 08:00:00"
+    startdate:
+    duedate: 
+    remind: 0
+    shared: 1
+    template: 1
+    published: 0

@@ -44,3 +44,28 @@ users:
     hashtype: bcrypt
     usertype: TEACHER
     perms: 4
+  -
+    # Template editor 1
+    userid: 5
+    username: publisher1@example.com
+    email: publisher1@example.com
+    name:
+    # Pass: "abc123" bcrypt cost 12
+    password: $2y$12$VfrngktsRxc//yr4O7E8t.kk30PgWliQgnFRGj8w2MfuMo97B9y0y
+    passwordsalt: BCRYPT-UNUSED
+    hashtype: bcrypt
+    usertype: TEACHER
+    perms: 2
+  -
+    # Template editor 2
+    userid: 6
+    username: publisher2@example.com
+    email: publisher2@example.com
+    name:
+    # Pass: "abc123" bcrypt cost 12
+    password: $2y$12$VfrngktsRxc//yr4O7E8t.kk30PgWliQgnFRGj8w2MfuMo97B9y0y
+    passwordsalt: BCRYPT-UNUSED
+    hashtype: bcrypt
+    usertype: TEACHER
+    perms: 2
+

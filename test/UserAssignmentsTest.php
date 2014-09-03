@@ -23,8 +23,8 @@ class RPC_UserAssignmentsTest extends RPC_PHPUnit_Extensions_Databaase_TestCase
 	public function testLoadUserTemplates()
 	{
 		$user1_admin = new RPC_User(RPC_User::RPC_QUERY_USER_BY_ID, 1, $this->config, $this->db);
-		// Should have 2 templates
-		$this->assertEquals(2, count(RPC_User::get_templates($user1_admin)));
+		// Should have 4 templates
+		$this->assertEquals(4, count(RPC_User::get_templates($user1_admin)));
 
 		// Other user can't see unpublished template
 		$user2 = new RPC_User(RPC_User::RPC_QUERY_USER_BY_USERNAME, 'testuser2@example.com', $this->config, $this->db);
@@ -38,6 +38,10 @@ class RPC_UserAssignmentsTest extends RPC_PHPUnit_Extensions_Databaase_TestCase
 	public function testLoadUserAssignments()
 	{
 		$user1 = new RPC_User(RPC_User::RPC_QUERY_USER_BY_ID, 1, $this->config, $this->db);
+		// The YAML fixture can't express dates relative to doday
+		// TODO: Improve this hacky situation
+		// 4, 1 are assignid, active, owned by user 1
+		$this->db->query("UPDATE assignments SET startdate = NOW(), duedate = NOW() + INTERVAL 2 DAY WHERE assignid IN (4, 1)");
 
 		// Total 4
 		// Inactive 1
