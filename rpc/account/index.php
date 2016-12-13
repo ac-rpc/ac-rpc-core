@@ -203,6 +203,10 @@ switch ($account_action)
 			header('Pragma: no-cache');
 			$smarty->skin_display('forms/native_newacct.tpl');
 			exit();
+		} else {
+			// Login creates account for non-native authentication
+			header("Location: " . $config->app_fixed_web_path . "?acct=login");
+			exit();
 		}
 		break;
 

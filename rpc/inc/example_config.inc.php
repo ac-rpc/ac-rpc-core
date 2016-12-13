@@ -64,6 +64,35 @@ $CONF['AUTH_SUPERUSERS'] = 'superuser@example.com';
  */
 $CONF['AUTH_PLUGIN'] = 'native';
 /**
+ * SHIB_ENTITY_IDENTIFIER: Complete HTTP protocol://hostname:port/idp
+ * to your Shibboleth Identity Provider's entityID
+ * Specify port if non-standard (80 or 443(ssl))
+ *
+ * *REQUIRED - If using 'shibboleth' for authentication*
+ */
+$CONF['SHIB_ENTITY_IDENTIFIER'] = "https://example.edu/idp/shibboleth";
+/**
+ * SHIB_USERNAME_KEY: The shibboleth attribute that identifies your user by username
+ * This value will become the logged-in username stored in users.username
+ *
+ * *REQUIRED - If using 'shibboleth' for authentication*
+ */
+$CONF['SHIB_USERNAME_KEY'] = 'uid';
+/**
+ * SHIB_EMAIL_KEY: The shibboleth attribute that maps to your user's email address
+ * This value will become the logged-in username stored in users.email
+ *
+ * *REQUIRED - If using 'shibboleth' for authentication*
+ */
+$CONF['SHIB_EMAIL_KEY'] = 'mail';
+/**
+ * SHIB_ALLOW_GUEST: Whether or not to allow guest access
+ * If TRUE, users are required to login via Shibboleth in order to access the RPC system
+ * If FALSE, users can create assignments but not save or recieve notifications without an account
+ * If unspecified, defaults to TRUE
+ */
+$CONF['SHIB_ALLOW_GUEST'] = TRUE;
+/**
  * SESSION_NAME: PHP Session name
  */
 $CONF['SESSION_NAME'] = 'RPC';

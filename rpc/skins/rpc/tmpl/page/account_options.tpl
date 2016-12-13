@@ -3,7 +3,7 @@
 				<ul>
 					<li><span class='a-acct-home'><a href='{$application.fixed_web_path}'>Home</a></span></li>
 					{if not isset($user.username)}
-					{if $acct_action != 'newacct'}
+					{if $acct_action != 'newacct' && $auth_plugin === 'native'}
 					<li><span class='a-acct-create'><a href='{$application.fixed_web_path}account?acct=newacct'>Create account</a></span></li>
 					{/if}
 					{if $acct_action != 'resetpw'}
