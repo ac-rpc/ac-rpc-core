@@ -301,7 +301,7 @@ class RPC_Config
 			'SHIB_ENTITY_IDENTIFIER',
 			'SHIB_USERNAME_KEY',
 			'SHIB_EMAIL_KEY',
-			'SHIB_ALLOW_GUEST',
+			'SHIB_MODE',
 			'ENTITY_IDENTIFIER',
 			'USERNAME_KEY',
 			'EMAIL_KEY',
@@ -359,8 +359,13 @@ class RPC_Config
 		// Shibboleth authorization values
 		$this->auth_shib['SHIB_ENTITY_IDENTIFIER'] = trim($GLOBALS['CONF']['SHIB_ENTITY_IDENTIFIER']);
 		$this->auth_shib['SHIB_USERNAME_KEY'] = trim($GLOBALS['CONF']['SHIB_USERNAME_KEY']);
-		$this->auth_shib['SHIB_EMAIL_KEY']    = trim($GLOBALS['CONF']['SHIB_EMAIL_KEY']);
-		$this->auth_shib['SHIB_ALLOW_GUEST'] = isset($GLOBALS['CONF']['SHIB_ALLOW_GUEST']) ? $GLOBALS['CONF']['SHIB_ALLOW_GUEST'] : TRUE;
+		$this->auth_shib['SHIB_EMAIL_KEY'] = trim($GLOBALS['CONF']['SHIB_EMAIL_KEY']);
+		$this->auth_shib['SHIB_MODE'] = isset($GLOBALS['CONF']['SHIB_MODE']) ? trim($GLOBALS['CONF']['SHIB_MODE']) : 'passive';
+
+		// Default shibboleth mode to 'passive' if invalid
+		if (!in_array($this->auth_shib['SHIB_MODE'], array('active', 'passive'))) {
+			$this->auth_shib['SHIB_MODE'] = 'passive';
+		}
 
 		$this->session_name = isset($GLOBALS['CONF']['SESSION_NAME']) && !empty($GLOBALS['CONF']['SESSION_NAME']) ? trim($GLOBALS['CONF']['SESSION_NAME']) : 'RPC';
 

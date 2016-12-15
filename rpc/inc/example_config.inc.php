@@ -86,12 +86,12 @@ $CONF['SHIB_USERNAME_KEY'] = 'uid';
  */
 $CONF['SHIB_EMAIL_KEY'] = 'mail';
 /**
- * SHIB_ALLOW_GUEST: Whether or not to allow guest access
- * If TRUE, users are required to login via Shibboleth in order to access the RPC system
- * If FALSE, users can create assignments but not save or recieve notifications without an account
- * If unspecified, defaults to TRUE
+ * SHIB_MODE: Whether to utilize active or passive protection
+ * If 'active', users are required to login via Shibboleth in order to access the RPC system
+ * If 'passive', users can create assignments but not save or receive notifications without an account
+ * If unspecified, defaults to PASSIVE
  */
-$CONF['SHIB_ALLOW_GUEST'] = TRUE;
+$CONF['SHIB_MODE'] = 'passive';
 /**
  * SESSION_NAME: PHP Session name
  */

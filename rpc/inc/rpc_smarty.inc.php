@@ -111,6 +111,9 @@ class RPC_Smarty extends Smarty
 		// display options in some templates
 		$this->assign('auth_plugin', $config->auth_plugin);
 
+		// Shibboleth mode stored -- depending on the mode some display options vary
+		$this->assign('shib_mode', $config->auth_shib['SHIB_MODE']);
+
 		return;
 	}
 	/**

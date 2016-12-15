@@ -29,8 +29,8 @@
      */
     function rpc_authenticate($enforce = TRUE, $config, $db = NULL)
     {
-        // Enforce if guest mode is off
-        $enforce = $config->auth_shib['SHIB_ALLOW_GUEST'] ? $enforce : TRUE;
+        // Enforce if active protection
+        $enforce = ($config->auth_shib['SHIB_MODE'] === 'active') ? TRUE : $enforce;
 
         // A Shibboleth session exists, get properties
         if (!empty($_SERVER["Shib-Session-ID"]) && $_SERVER["Shib-Identity-Provider"] == $config->auth_shib['SHIB_ENTITY_IDENTIFIER']) {
@@ -72,17 +72,17 @@
      * Optional Session clean up function
      * Destroy the current login session
      *
+     * @param object $user RPC_User to log out
      * @access public
      * @return void
      */
-    function rpc_logout()
+    function rpc_logout($user)
     {
-        // Clear session data
-        unset($_SESSION['transid']);
-        unset($_SESSION['username']);
-
-        // Logout via Shibboleth and show the logout screen after successful
-        header("Location: https://{$_SERVER['HTTP_HOST']}/Shibboleth.sso/Logout?return=" . urlencode("https://{$_SERVER['HTTP_HOST']}/" . explode("/", $_SERVER['REQUEST_URI'])[1] ."/account?acct=logout"));
-        exit();
+        // If passive protection then logout via Shibboleth
+        if ($user->config->auth_shib['SHIB_MODE'] === 'passive') {
+            // Logout via Shibboleth and show the logout screen after successful
+            header("Location: https://{$_SERVER['HTTP_HOST']}/Shibboleth.sso/Logout?return=" . urlencode("https://{$_SERVER['HTTP_HOST']}/" . explode("/", $_SERVER['REQUEST_URI'])[1] ."/account?acct=logout"));
+            exit();
+        }
     }
 ?>
