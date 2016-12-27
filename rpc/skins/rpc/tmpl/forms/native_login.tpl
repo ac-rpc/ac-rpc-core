@@ -32,7 +32,7 @@
 					</ol>
 					<p>
 						<span class='assignment-label fixed-label label-spacer'></span>
-						<a href='{$application.fixed_web_path}account?acct=resetpw'>Forgot password</a> | 
+						<a href='{$application.fixed_web_path}account?acct=resetpw'>Forgot password</a> |
 						<a href='{$application.fixed_web_path}account?acct=newacct'>Create account</a>
 					</p>
 				</fieldset>
@@ -41,7 +41,7 @@
 			<script type='text/javascript'>
 				dojo.addOnLoad(function(){
 					dojo.byId("login-user").focus();
-				});	
+				});
 			</script>
 			{/literal}
 		</div>

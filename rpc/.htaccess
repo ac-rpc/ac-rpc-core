@@ -11,6 +11,13 @@ Allow from all
 	Deny from all
 </Files>
 
+# Enable to use Shibboleth for "lazy" authentication
+# *Note* Don't forget to configure Shibboleth
+
+#AuthType shibboleth
+#ShibRequestSetting requireSession false
+#Require shibboleth
+
 RewriteEngine On
 RewriteBase /
 

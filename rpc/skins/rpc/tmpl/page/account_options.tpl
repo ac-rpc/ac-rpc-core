@@ -3,10 +3,10 @@
 				<ul>
 					<li><span class='a-acct-home'><a href='{$application.fixed_web_path}'>Home</a></span></li>
 					{if not isset($user.username)}
-					{if $acct_action != 'newacct'}
+					{if $acct_action != 'newacct' && $auth_plugin === 'native'}
 					<li><span class='a-acct-create'><a href='{$application.fixed_web_path}account?acct=newacct'>Create account</a></span></li>
 					{/if}
-					{if $acct_action != 'resetpw'}
+					{if $auth_plugin === 'native' && $acct_action != 'resetpw'}
 					<li><span class='a-acct-forgot-pass'><a href='{$application.fixed_web_path}account?acct=resetpw'>Forgot password</a></span></li>
 					{/if}
 					{* Login link if user not logged in... *}
@@ -17,7 +17,9 @@
 					<li><span class='a-acct-admin'><a href='{$application.fixed_web_path}admin' title='Change site settings'>Administration</a></span> </li>
 					{/if}
 					<li><span class='a-acct-settings'><a href='{$application.fixed_web_path}account' title='Change my account settings'>My Settings</a></span> </li>
+					{if $auth_plugin !== 'shibboleth' || $shib_mode === 'passive'}
 					<li><span class='a-acct-logout'><a href='{$application.fixed_web_path}account?acct=logout' title='Logout of the {$application.short_name}'>Logout</a></span></li>
+					{/if}
 					{/if}
 				</ul>
 			</div>

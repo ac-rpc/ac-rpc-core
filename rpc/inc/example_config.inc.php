@@ -1,20 +1,20 @@
 <?php
 /**
- * Copyright 2010 by the Regents of the University of Minnesota, 
+ * Copyright 2010 by the Regents of the University of Minnesota,
  * University Libraries - Minitex
  *
  * This file is part of The Research Project Calculator (RPC).
- * 
+ *
  * RPC is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * RPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with The RPC.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -40,19 +40,19 @@ $CONF['DB_HOST'] = 'localhost';
  */
 $CONF['DB_PORT'] = 3306;
 /**
- * DB_NAME: Database name 
+ * DB_NAME: Database name
  *
  * *REQUIRED*
  */
 $CONF['DB_NAME'] = 'YOUR DATABASE NAME';
 /**
- * DB_USER: Database username with access to DB_NAME 
+ * DB_USER: Database username with access to DB_NAME
  *
  * *REQUIRED*
  */
 $CONF['DB_USER'] = 'DATABASE USERNAME';
 /**
- * DB_PASS: Database password for DB_USER 
+ * DB_PASS: Database password for DB_USER
  */
 $CONF['DB_PASS'] = 'DATABASE PASSWORD';
 /**
@@ -60,15 +60,44 @@ $CONF['DB_PASS'] = 'DATABASE PASSWORD';
  */
 $CONF['AUTH_SUPERUSERS'] = 'superuser@example.com';
 /**
- * AUTH_PLUGIN: Authentication plugin to use, located in plugins/auth 
+ * AUTH_PLUGIN: Authentication plugin to use, located in plugins/auth
  */
 $CONF['AUTH_PLUGIN'] = 'native';
+/**
+ * SHIB_ENTITY_IDENTIFIER: Complete HTTP protocol://hostname:port/idp
+ * to your Shibboleth Identity Provider's entityID
+ * Specify port if non-standard (80 or 443(ssl))
+ *
+ * *REQUIRED - If using 'shibboleth' for authentication*
+ */
+$CONF['SHIB_ENTITY_IDENTIFIER'] = "https://example.edu/idp/shibboleth";
+/**
+ * SHIB_USERNAME_KEY: The shibboleth attribute that identifies your user by username
+ * This value will become the logged-in username stored in users.username
+ *
+ * *REQUIRED - If using 'shibboleth' for authentication*
+ */
+$CONF['SHIB_USERNAME_KEY'] = 'uid';
+/**
+ * SHIB_EMAIL_KEY: The shibboleth attribute that maps to your user's email address
+ * This value will become the logged-in username stored in users.email
+ *
+ * *REQUIRED - If using 'shibboleth' for authentication*
+ */
+$CONF['SHIB_EMAIL_KEY'] = 'mail';
+/**
+ * SHIB_MODE: Whether to utilize active or passive protection
+ * If 'active', users are required to login via Shibboleth in order to access the RPC system
+ * If 'passive', users can create assignments but not save or receive notifications without an account
+ * If unspecified, defaults to PASSIVE
+ */
+$CONF['SHIB_MODE'] = 'passive';
 /**
  * SESSION_NAME: PHP Session name
  */
 $CONF['SESSION_NAME'] = 'RPC';
 /**
- * HTTP_HOST: Complete HTTP protocol://hostname:port specification 
+ * HTTP_HOST: Complete HTTP protocol://hostname:port specification
  * for this installation.
  * If unspecified, defaults to http://hostname
  * Specify port if non-standard (80 or 443(ssl))
@@ -88,12 +117,12 @@ $CONF['RELATIVE_WEB_PATH'] = "/path/to/application";
  */
 $CONF['DOJO_PATH'] = '/rpc-dojo';
 /**
- * USE_URL_REWRITE: Is Apache URL rewriting active? if TRUE, links will take it into 
+ * USE_URL_REWRITE: Is Apache URL rewriting active? if TRUE, links will take it into
  * account. If FALSE, URLs will use exposed querystrings
  */
 $CONF['USE_URL_REWRITE'] = TRUE;
 /**
- * APP_LONG_NAME: Long title of this application (appears on user interface, email notifications) 
+ * APP_LONG_NAME: Long title of this application (appears on user interface, email notifications)
  *
  * *REQUIRED*
  */
@@ -110,7 +139,7 @@ $CONF['APP_SHORT_NAME'] = 'RPC';
  */
 $CONF['EMAIL_FROM_ADDRESS'] = 'address@example.com';
 /**
- * EMAIL_FROM_SENDER_NAME: Human readable sender name for notifications 
+ * EMAIL_FROM_SENDER_NAME: Human readable sender name for notifications
  */
 $CONF['EMAIL_FROM_SENDER_NAME'] = 'NAME OF THE SENDER';
 /**
@@ -129,7 +158,7 @@ $CONF['SHORT_DATE_FORMAT'] = "%m/%d/%Y";
  */
 $CONF['LONG_DATE_FORMAT'] = "%a %h %d, %Y";
 /**
- * SKIN: Site style skin, a directory in skins/ 
+ * SKIN: Site style skin, a directory in skins/
  */
 $CONF['SKIN'] = "rpc";
 ?>

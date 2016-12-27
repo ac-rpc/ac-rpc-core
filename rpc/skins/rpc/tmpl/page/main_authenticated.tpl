@@ -3,8 +3,11 @@
 	<script type='text/javascript' src='{$application.dojo_path}dojo/rpc-home.js'></script>
 	<script type='text/javascript' src='{$application.relative_web_path}js/home.js'></script>
 	<div id='welcome'>
-		Welcome back, {$user.name}.<br />
-		<span class='not-me'>(<a href='{$application.fixed_web_path}account?acct=logout'>Click here if you're not {$user.name}</a>)</span>
+		Welcome back, {$user.name}.
+		{if $auth_plugin !== 'shibboleth' || $shib_mode === 'passive'}
+			<br />
+			<span class='not-me'>(<a href='{$application.fixed_web_path}account?acct=logout'>Click here if you're not {$user.name}</a>)</span>
+		{/if}
 	</div>
 	<div class='main-widget' id='new-assignment'>
 		<h3>Create a new assignment</h3>

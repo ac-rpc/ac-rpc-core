@@ -152,7 +152,8 @@ switch ($account_action)
 		else
 		{
 			$_SESSION['general_error'] = "Invalid action";
-			header("Location: " . $config->app_fixed_web_path);
+			// Non-native authentication passwords are maintained else where just show login
+			header("Location: " . $config->app_fixed_web_path . "?acct=login");
 			exit();
 		}
 		break;
@@ -280,7 +281,8 @@ switch ($account_action)
 		else
 		{
 			$_SESSION['general_error'] = "Invalid action";
-			header("Location: " . $config->app_fixed_web_path);
+			// Login creates account for non-native authentication
+			header("Location: " . $config->app_fixed_web_path . "?acct=login");
 			exit();
 		}
 		break;
@@ -388,45 +390,53 @@ switch ($account_action)
 			// Native authentication users may be changing passwords...
 			else if (isset($_POST['oldpassword']) && (isset($_SESSION['transid']) && $_POST['transid'] === $_SESSION['transid']))
 			{
-				$arr_resubmit = array();
-				// Passwords must match and be minimum 6 characters
-				if ($_POST['password'] === $_POST['password-confirm'])
-				{
-					$db->beginTransaction();
-					if ($user->set_password($_POST['oldpassword'], $_POST['password']))
+				if ($config->auth_plugin == 'native') {
+					$arr_resubmit = array();
+					// Passwords must match and be minimum 6 characters
+					if ($_POST['password'] === $_POST['password-confirm'])
 					{
-						$db->commit();
-						$_SESSION['transid'] = md5(time() . rand());
-						$smarty->assign('transid', $_SESSION['transid']);
-						$smarty->assign('acct_success', "Your password has been changed.");
-					}
-					else
-					{
-						if ($user->error == Native_User::ERR_INCORRECT_CREDS)
+						$db->beginTransaction();
+						if ($user->set_password($_POST['oldpassword'], $_POST['password']))
 						{
-							$arr_resubmit['oldpassword'] = TRUE;
-							$smarty->assign('acct_error', "You entered your old password incorrectly.");
-						}
-						else if ($user->error == Native_User::ERR_PASWORD_COMPLEXITY_UNMET)
-						{
-							$arr_resubmit['password'] = TRUE;
-							$smarty->assign('acct_error', "New password must be at least 6 characters and contain at least one number.");
+							$db->commit();
+							$_SESSION['transid'] = md5(time() . rand());
+							$smarty->assign('transid', $_SESSION['transid']);
+							$smarty->assign('acct_success', "Your password has been changed.");
 						}
 						else
 						{
-							$smarty->assign('acct_error', "A database error occurred.");
-						}
+							if ($user->error == Native_User::ERR_INCORRECT_CREDS)
+							{
+								$arr_resubmit['oldpassword'] = TRUE;
+								$smarty->assign('acct_error', "You entered your old password incorrectly.");
+							}
+							else if ($user->error == Native_User::ERR_PASWORD_COMPLEXITY_UNMET)
+							{
+								$arr_resubmit['password'] = TRUE;
+								$smarty->assign('acct_error', "New password must be at least 6 characters and contain at least one number.");
+							}
+							else
+							{
+								$smarty->assign('acct_error', "A database error occurred.");
+							}
 
-						$db->rollBack();
+							$db->rollBack();
+							$smarty->assign('transid', $_SESSION['transid']);
+							$smarty->assign('resubmit', $arr_resubmit);
+						}
+					}
+					else
+					{
+						$arr_resubmit['password'] = TRUE;
 						$smarty->assign('transid', $_SESSION['transid']);
-						$smarty->assign('resubmit', $arr_resubmit);
+						$smarty->assign('acct_error', "Your passwords did not match.");
 					}
 				}
 				else
 				{
-					$arr_resubmit['password'] = TRUE;
-					$smarty->assign('transid', $_SESSION['transid']);
-					$smarty->assign('acct_error', "Your passwords did not match.");
+					// Non-native authentication passwords are maintained else where
+					header("Location: " . $config->app_fixed_web_path . "?acct=login");
+					exit();
 				}
 			}
 			/************************ DELTE ACCOUNT *****************************/

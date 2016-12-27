@@ -92,6 +92,13 @@ class RPC_Config
 	 * @access public
 	 */
 	public $auth_plugin = NULL;
+	/**
+	 * Array of Shibboleth Native SP configuration options
+	 *
+	 * @var array
+	 * @access public
+	 */
+	public $auth_shib = NULL;
 
 
 	/********** Session Options ***********/
@@ -280,6 +287,13 @@ class RPC_Config
 			'APP_LONG_NAME',
 			'EMAIL_FROM_ADDRESS'
 		);
+		// Verify that Shibboleth requirements met if shibboleth enabled
+		if ($GLOBALS['CONF']['AUTH_PLUGIN'] == 'shibboleth')
+		{
+			$required_keys[] = 'SHIB_ENTITY_IDENTIFIER';
+			$required_keys[] = 'SHIB_USERNAME_KEY';
+			$required_keys[] = 'SHIB_EMAIL_KEY';
+		}
 		$missing_keys = array();
 		foreach ($required_keys as $key)
 		{
@@ -298,6 +312,14 @@ class RPC_Config
 			'DB_PASS',
 			'AUTH_SUPERUSERS',
 			'AUTH_PLUGIN',
+			'SHIB_ENTITY_IDENTIFIER',
+			'SHIB_USERNAME_KEY',
+			'SHIB_EMAIL_KEY',
+			'SHIB_MODE',
+			'ENTITY_IDENTIFIER',
+			'USERNAME_KEY',
+			'EMAIL_KEY',
+			'ALLOW_GUEST',
 			'SESSION_NAME',
 			'HTTP_HOST',
 			'RELATIVE_WEB_PATH',
@@ -347,6 +369,18 @@ class RPC_Config
 		$this->db_port = isset($GLOBALS['CONF']['DB_PORT']) ? $GLOBALS['CONF']['DB_PORT'] : $this->db_port;
 
 		$this->auth_plugin = trim($GLOBALS['CONF']['AUTH_PLUGIN']);
+
+		// Shibboleth authorization values
+		$this->auth_shib['SHIB_ENTITY_IDENTIFIER'] = trim($GLOBALS['CONF']['SHIB_ENTITY_IDENTIFIER']);
+		$this->auth_shib['SHIB_USERNAME_KEY'] = trim($GLOBALS['CONF']['SHIB_USERNAME_KEY']);
+		$this->auth_shib['SHIB_EMAIL_KEY'] = trim($GLOBALS['CONF']['SHIB_EMAIL_KEY']);
+		$this->auth_shib['SHIB_MODE'] = isset($GLOBALS['CONF']['SHIB_MODE']) ? trim($GLOBALS['CONF']['SHIB_MODE']) : 'passive';
+
+		// Default shibboleth mode to 'passive' if invalid
+		if (!in_array($this->auth_shib['SHIB_MODE'], array('active', 'passive'))) {
+			$this->auth_shib['SHIB_MODE'] = 'passive';
+		}
+
 		$this->session_name = isset($GLOBALS['CONF']['SESSION_NAME']) && !empty($GLOBALS['CONF']['SESSION_NAME']) ? trim($GLOBALS['CONF']['SESSION_NAME']) : 'RPC';
 
 		$this->app_dojo_path = rtrim($GLOBALS['CONF']['DOJO_PATH'], '/') . '/';
