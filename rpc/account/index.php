@@ -54,6 +54,7 @@ switch ($account_action)
 					{
 						$smarty->assign('acct_error', "No account could be located for " . htmlentities($_POST['username']));
 						$smarty->assign('transid', $_SESSION['transid']);
+						$form = 'forms/native_resetpw.tpl';
 					}
 					else if (!empty($reset_user->error))
 					{
