@@ -6,7 +6,7 @@ steps:
     title: User 1 Assignment 1 Step 1
     description: <h1>The Description<h1><p>A description here</p>
     teacher_description: <h1>The Teacher Description<h1><p>A description here</p>
-    reminderdate: 2014-08-15 00:00:00
+    reminderdate: !str 2014-08-15 00:00:00
   -
     stepid: 2
     assignid: 1
@@ -14,7 +14,7 @@ steps:
     title: User 1 Assignment 1 Step 2
     description: <h1>The Description<h1><p>A description here</p>
     teacher_description: <h1>The Teacher Description<h1><p>A description here</p>
-    reminderdate: 2014-09-01 00:00:00
+    reminderdate: !str 2014-09-01 00:00:00
   -
     stepid: 3
     assignid: 2
