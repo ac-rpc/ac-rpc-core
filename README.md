@@ -9,7 +9,7 @@ In summer 2017 we reimplemented the most-used features of the Assignment
 Calculator inside our CMS platrofm at https://www.lib.umn.edu/ac.  We will not
 be making further updates to this repository.
 
-The [`experimental` branch](https://github.com/ac-rpc/ac-rpc-core) contains the
+The [`experimental` branch](https://github.com/ac-rpc/ac-rpc-core/tree/experimental) contains the
 most up to date code, with security improvements, a full implementation of the
 PDO database abstraction extension, and considerably more unit testing.
 Although we consider the implementation complete, the `experimental` branch had
