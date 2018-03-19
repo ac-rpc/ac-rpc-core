@@ -6,7 +6,7 @@ the needs of Minitex and the Univ. of Minnesota for more than 8 years, but the
 time has come to retire the codebase.
 
 In summer 2017 we reimplemented the most-used features of the Assignment
-Calculator inside our CMS platrofm at https://www.lib.umn.edu/ac.  We will not
+Calculator inside our CMS platform at https://www.lib.umn.edu/ac.  We will not
 be making further updates to this repository.
 
 The [`experimental` branch](https://github.com/ac-rpc/ac-rpc-core/tree/experimental) contains the
